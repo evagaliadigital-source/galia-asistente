@@ -12,6 +12,12 @@ import { fileURLToPath } from "url";
 
 import { generateLeadReply } from "./openai.js";
 import {
+  sendWhatsAppMessage,
+  extractWhatsAppMessage,
+  markAsRead,
+  isWhatsAppConfigured,
+} from "./whatsapp.js";
+import {
   upsertLead,
   updateConversation,
   updateLeadStatus,
@@ -46,9 +52,13 @@ app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     service: "Galia Belleza - Asistente de Captación",
-    version: "1.0.0",
+    version: "1.1.0",
     timestamp: new Date().toISOString(),
-    openai: process.env.OPENAI_API_KEY ? "configurado" : "⚠️ NO CONFIGURADO",
+    openai: (process.env.GSK_API_KEY || process.env.OPENAI_API_KEY) ? "✅ configurado" : "⚠️ NO CONFIGURADO",
+    whatsapp: isWhatsAppConfigured()
+      ? `✅ configurado (Phone ID: ${process.env.WA_PHONE_NUMBER_ID})`
+      : "⚠️ NO CONFIGURADO — faltan WA_PHONE_NUMBER_ID y/o WA_ACCESS_TOKEN",
+    verifyToken: process.env.WA_VERIFY_TOKEN || "galia_webhook_2025",
   });
 });
 
@@ -252,68 +262,114 @@ app.patch("/leads/:id/status", (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// POST /webhook
-// Preparado para WhatsApp Cloud API / Twilio / Make
+// GET /webhook
+// Verificación del webhook por Meta Developers
+// Meta envía: hub.mode=subscribe, hub.verify_token, hub.challenge
 // ─────────────────────────────────────────────
-app.post("/webhook", async (req, res) => {
-  try {
-    // WhatsApp Cloud API verification
-    if (req.query["hub.mode"] === "subscribe") {
-      const token = req.query["hub.verify_token"];
-      if (token === process.env.WHATSAPP_VERIFY_TOKEN) {
-        return res.send(req.query["hub.challenge"]);
-      }
-      return res.status(403).send("Forbidden");
-    }
+app.get("/webhook", (req, res) => {
+  const mode      = req.query["hub.mode"];
+  const token     = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
 
-    // Procesar mensaje entrante de WhatsApp
-    const body = req.body;
+  const expectedToken = process.env.WA_VERIFY_TOKEN || "galia_webhook_2025";
 
-    // WhatsApp Cloud API format
-    if (body?.object === "whatsapp_business_account") {
-      const entry = body.entry?.[0];
-      const change = entry?.changes?.[0];
-      const message = change?.value?.messages?.[0];
-
-      if (message && message.type === "text") {
-        const phone = message.from;
-        const text = message.text.body;
-
-        // Reutilizar la misma lógica de /lead-message
-        req.body = { phone, message: text, source: "whatsapp" };
-
-        // Aquí llamarías internamente o reutilizarías el handler
-        console.log(`📱 WhatsApp de ${phone}: ${text}`);
-        // TODO: implementar envío de respuesta vía WhatsApp API
-      }
-    }
-
-    // Twilio format
-    if (body?.From && body?.Body) {
-      const phone = body.From.replace("whatsapp:", "");
-      const text = body.Body;
-      console.log(`📱 Twilio WhatsApp de ${phone}: ${text}`);
-      // TODO: implementar respuesta Twilio
-    }
-
-    res.status(200).json({ received: true });
-  } catch (error) {
-    console.error("❌ Error en webhook:", error);
-    res.status(500).json({ error: "Error interno" });
+  if (mode === "subscribe" && token === expectedToken) {
+    console.log("✅ WhatsApp webhook verificado correctamente");
+    res.status(200).send(challenge);
+  } else {
+    console.warn(`⚠️ Verificación fallida — token recibido: '${token}' | esperado: '${expectedToken}'`);
+    res.status(403).send("Forbidden");
   }
 });
 
-// Verificación GET para WhatsApp Cloud API
-app.get("/webhook", (req, res) => {
-  const mode = req.query["hub.mode"];
-  const token = req.query["hub.verify_token"];
-  const challenge = req.query["hub.challenge"];
+// ─────────────────────────────────────────────
+// POST /webhook
+// Recibe mensajes entrantes de WhatsApp Cloud API
+// ─────────────────────────────────────────────
+app.post("/webhook", async (req, res) => {
+  // Responder 200 inmediatamente para que Meta no reintente
+  res.status(200).json({ received: true });
 
-  if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN) {
-    console.log("✅ WhatsApp webhook verificado");
-    res.send(challenge);
-  } else {
-    res.status(403).send("Forbidden");
+  try {
+    const body = req.body;
+
+    // Ignorar si no es un evento de WhatsApp Business
+    if (body?.object !== "whatsapp_business_account") {
+      console.log("📦 Webhook recibido (no WhatsApp):", JSON.stringify(body).slice(0, 200));
+      return;
+    }
+
+    // Extraer datos del mensaje usando whatsapp.js
+    const incoming = extractWhatsAppMessage(body);
+
+    if (!incoming) {
+      // Puede ser un status update (delivered, read), no un mensaje de texto
+      console.log("📊 Status update de WhatsApp (no mensaje de texto), ignorando.");
+      return;
+    }
+
+    const { phone, text, messageId, name } = incoming;
+    console.log(`📱 WhatsApp entrante | De: ${phone} | Nombre: ${name || "desconocido"} | Msg: ${text}`);
+
+    // Marcar mensaje como leído (tick azul) — fire & forget
+    if (messageId && isWhatsAppConfigured()) {
+      markAsRead(messageId).catch(() => {});
+    }
+
+    // Buscar lead existente por teléfono
+    let lead = getLeadByPhone(phone);
+    const conversationHistory = lead?.conversationHistory || [];
+
+    // Generar respuesta con IA
+    const aiReply = await generateLeadReply(conversationHistory, text);
+
+    // Actualizar historial
+    const updatedHistory = [
+      ...conversationHistory,
+      { role: "user",      content: text },
+      { role: "assistant", content: aiReply },
+    ];
+
+    // Extraer datos del mensaje (heurística)
+    const extractedData = extractLeadData(text, lead);
+
+    // Upsert lead en la base de datos
+    lead = upsertLead({
+      id:            lead?.id,
+      name:          name || extractedData.name || lead?.name,
+      phone,
+      salonName:     extractedData.salonName  || lead?.salonName,
+      zone:          extractedData.zone       || lead?.zone,
+      preferredTime: extractedData.preferredTime || lead?.preferredTime,
+      lastMessage:   text,
+      source:        "whatsapp",
+      status:        lead?.status || "pendiente_llamar",
+    });
+
+    // Guardar historial actualizado
+    updateConversation(lead.id, updatedHistory);
+
+    // Notificaciones al equipo
+    const isComplete = lead.preferredTime && (lead.salonName || lead.phone || lead.name);
+    if (isComplete && !lead._notified) {
+      await notifyNewLead(lead, "lead_completo_whatsapp");
+      updateLeadStatus(lead.id, "pendiente_llamar");
+    } else if (!lead._notified) {
+      await notifyNewLead(lead, "primer_contacto_whatsapp");
+    }
+
+    // Enviar respuesta por WhatsApp
+    if (isWhatsAppConfigured()) {
+      const sendResult = await sendWhatsAppMessage(phone, aiReply);
+      if (!sendResult.success) {
+        console.error("❌ Fallo al enviar respuesta WhatsApp:", sendResult.error);
+      }
+    } else {
+      console.warn("⚠️ WhatsApp no configurado — respuesta IA generada pero NO enviada:", aiReply);
+    }
+
+  } catch (error) {
+    console.error("❌ Error procesando webhook WhatsApp:", error.message);
   }
 });
 

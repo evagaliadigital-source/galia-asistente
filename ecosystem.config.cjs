@@ -7,8 +7,16 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
+        // OpenAI / Genspark proxy
+        GSK_API_KEY: process.env.GSK_API_KEY || '',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+        // Panel interno
         ADMIN_API_KEY: process.env.ADMIN_API_KEY || 'galia_admin_2025',
+        // ─── WhatsApp Cloud API (Meta) ───────────────────────────────
+        WA_PHONE_NUMBER_ID: '1061621347044439',
+        WA_BUSINESS_ACCOUNT_ID: '1376971050938405',
+        WA_ACCESS_TOKEN: 'EAAN8O9HL53YBRk2suNFx09FES8J2tv29JtoW6UFxzHCvn1KbTZCyyVt4CXfRFBRzsRDTNdWSQX4DLiZB5gkajZAZBwWKAZCkZCBLxxYjZBZAoIRj6wkrW19ngayn0sCKJTabptEoYhZBxHKci5CfDiuIsgu6Hw5bqgnEZAVmTbzlS2CnRljyEnmksOrE07PQd2uO5ZBFr4nkTZAMu6siFTPKyAZByScCZCacvPXqfSuglPcl1MLnqsZCrjmUSg0LP6jZBIBBDRsdsi331omclueLf0ZCqHeQn2VZAr',
+        WA_VERIFY_TOKEN: 'galia_webhook_2025',
       },
       watch: false,
       instances: 1,
