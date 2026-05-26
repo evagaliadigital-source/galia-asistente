@@ -3,63 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asesoría Gratuita · Galia Belleza</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+  <title>Asesoría Gratuita · GALia Belleza</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐙</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            galia:   { DEFAULT: '#64358F', dark: '#4e2870', light: '#7d47ad' },
+            teal:    { DEFAULT: '#26A7A1', dark: '#1d8a85', light: '#3bbfb9' },
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { font-family: 'Inter', sans-serif; }
-    
-    .bubble-user { background: #7c3aed; color: white; border-radius: 18px 18px 4px 18px; }
+
+    .bubble-user { background: #64358F; color: white; border-radius: 18px 18px 4px 18px; }
     .bubble-bot  { background: #f3f4f6; color: #1f2937; border-radius: 18px 18px 18px 4px; }
-    
+
     .chat-container { height: 380px; overflow-y: auto; scroll-behavior: smooth; }
     .chat-container::-webkit-scrollbar { width: 4px; }
     .chat-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-    
+
     .typing-dot { animation: typing 1.4s infinite; }
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-    
-    .gradient-bg { background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); }
+
+    .gradient-bg  { background: linear-gradient(135deg, #64358F 0%, #26A7A1 100%); }
+    .gradient-btn { background: linear-gradient(135deg, #64358F 0%, #26A7A1 100%); }
+
     .pulse-ring { animation: pulse-ring 2s infinite; }
-    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(124, 58, 237, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); } }
+    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(100,53,143,0.4); } 70% { box-shadow: 0 0 0 12px rgba(100,53,143,0); } 100% { box-shadow: 0 0 0 0 rgba(100,53,143,0); } }
+
+    .check-icon { background: #ede9fe; color: #64358F; }
+    input:focus { border-color: #64358F !important; ring-color: #64358F; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
   <!-- HEADER -->
-  <header class="gradient-bg text-white py-4 px-6 shadow-lg">
-    <div class="max-w-4xl mx-auto flex items-center gap-3">
-      <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-        <i class="fas fa-scissors text-white text-lg"></i>
-      </div>
-      <div>
-        <h1 class="font-bold text-lg leading-tight">Galia Belleza</h1>
-        <p class="text-white/80 text-xs">Asesora digital para peluquerías</p>
-      </div>
-      <div class="ml-auto flex items-center gap-2">
+  <header class="gradient-bg text-white py-3 px-6 shadow-lg">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <img src="/logo-galia.png" alt="GALia Belleza" class="h-10 w-auto" />
+      <div class="flex items-center gap-2">
         <span class="w-2 h-2 bg-green-400 rounded-full pulse-ring"></span>
-        <span class="text-xs text-white/80">En línea</span>
+        <span class="text-xs text-white/80">Asistente en línea</span>
       </div>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="max-w-4xl mx-auto px-4 py-8">
     <div class="grid md:grid-cols-2 gap-8 items-start">
 
       <!-- LEFT: INFO -->
       <div>
         <div class="mb-6">
-          <span class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-            🎁 100% GRATUITO
+          <span class="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4" style="background:#ede9fe;color:#64358F;">
+            🎁 100% GRATUITO · SIN COMPROMISO
           </span>
           <h2 class="text-3xl font-bold text-gray-900 leading-tight mb-3">
             ¿Tu agenda te tiene<br>
-            <span class="text-purple-600">secuestrada?</span>
+            <span style="color:#64358F;">secuestrada?</span>
           </h2>
           <p class="text-gray-600 leading-relaxed">
             En 15 minutos revisamos tu salón y te damos un plan de mejora claro y sencillo. Sin rollos. Sin compromiso.
@@ -68,40 +79,44 @@
 
         <div class="space-y-3 mb-6">
           <div class="flex items-center gap-3 text-gray-700">
-            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-check text-purple-600 text-sm"></i>
+            <div class="check-icon w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-check text-sm"></i>
             </div>
             <span class="text-sm">Asesoría gratuita de 15 minutos</span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
-            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-check text-purple-600 text-sm"></i>
+            <div class="check-icon w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-check text-sm"></i>
             </div>
-            <span class="text-sm">Plan de mejora personalizado</span>
+            <span class="text-sm">Plan de mejora personalizado para tu salón</span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
-            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-check text-purple-600 text-sm"></i>
+            <div class="check-icon w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-check text-sm"></i>
             </div>
-            <span class="text-sm">Especialistas en peluquerías y salones</span>
+            <span class="text-sm">Especialistas en peluquerías y salones de belleza</span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
-            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-check text-purple-600 text-sm"></i>
+            <div class="check-icon w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-check text-sm"></i>
             </div>
-            <span class="text-sm">Sin compromiso ni permanencia</span>
+            <span class="text-sm">Sin permanencia ni letras pequeñas</span>
           </div>
         </div>
 
-        <!-- DATOS RÁPIDOS -->
-        <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-          <p class="text-xs text-gray-500 mb-3 font-medium uppercase tracking-wide">O rellena tus datos directamente</p>
+        <!-- FORMULARIO RÁPIDO -->
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">O déjanos tus datos directamente</p>
           <form id="quickForm" class="space-y-3">
-            <input type="text" id="qName" placeholder="Tu nombre" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-            <input type="tel" id="qPhone" placeholder="Teléfono / WhatsApp *" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-            <input type="text" id="qSalon" placeholder="Nombre de tu salón" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-            <input type="text" id="qZone" placeholder="Zona / ciudad" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-            <select id="qTime" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 text-gray-600">
+            <input type="text" id="qName" placeholder="Tu nombre"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2" style="--tw-ring-color:#64358F" />
+            <input type="tel" id="qPhone" placeholder="Teléfono / WhatsApp *" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+            <input type="text" id="qSalon" placeholder="Nombre de tu salón"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+            <input type="text" id="qZone" placeholder="Zona / ciudad"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+            <select id="qTime" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 text-gray-600">
               <option value="">¿Cuándo te llamamos?</option>
               <option value="Hoy mañana (9h-12h)">Hoy mañana (9h-12h)</option>
               <option value="Hoy mediodía (12h-15h)">Hoy mediodía (12h-15h)</option>
@@ -109,7 +124,7 @@
               <option value="Mañana mañana (9h-12h)">Mañana mañana (9h-12h)</option>
               <option value="Mañana tarde (15h-19h)">Mañana tarde (15h-19h)</option>
             </select>
-            <button type="submit" class="w-full gradient-bg text-white py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
+            <button type="submit" class="gradient-btn w-full text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm">
               <i class="fas fa-paper-plane mr-2"></i>Solicitar asesoría gratuita
             </button>
           </form>
@@ -121,55 +136,40 @@
       <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <!-- Chat header -->
         <div class="gradient-bg px-4 py-3 flex items-center gap-3">
-          <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-            <i class="fas fa-robot text-white text-sm"></i>
-          </div>
+          <img src="/logo-galia.png" alt="GALia" class="h-8 w-auto" />
           <div>
-            <p class="text-white font-semibold text-sm">Asistente Galia</p>
-            <p class="text-white/70 text-xs">Responde en segundos</p>
+            <p class="text-white font-semibold text-sm">Asistente GALia</p>
+            <p class="text-white/70 text-xs">Responde en segundos ⚡</p>
           </div>
         </div>
 
         <!-- Messages -->
         <div class="chat-container p-4" id="chatMessages">
-          <!-- Mensaje inicial del bot -->
           <div class="flex gap-2 mb-3">
-            <div class="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <i class="fas fa-robot text-purple-600 text-xs"></i>
-            </div>
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-sm" style="background:#ede9fe;">🐙</div>
             <div class="bubble-bot px-4 py-3 text-sm max-w-xs leading-relaxed">
-              ¡Hola! 👋 Gracias por escribir a Galia Belleza. La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?
+              ¡Hola! 👋 Gracias por escribir a GALia Belleza. La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?
             </div>
           </div>
         </div>
 
         <!-- Input -->
         <div class="border-t border-gray-100 p-3">
-          <!-- Phone input (first time) -->
           <div id="phoneInputArea" class="mb-2">
-            <input type="tel" id="chatPhone" placeholder="Tu teléfono (para identificarte)" 
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 mb-1" />
+            <input type="tel" id="chatPhone" placeholder="Tu teléfono (para identificarte)"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 mb-1" />
           </div>
           <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="chatInput" 
-              placeholder="Escribe tu mensaje..."
-              class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-            />
-            <button 
-              id="chatSend"
-              onclick="sendChatMessage()"
-              class="gradient-bg text-white px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity"
-            >
+            <input type="text" id="chatInput" placeholder="Escribe tu mensaje..."
+              class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+            <button onclick="sendChatMessage()" class="gradient-btn text-white px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
               <i class="fas fa-paper-plane text-sm"></i>
             </button>
           </div>
-          <!-- Quick replies -->
           <div class="flex gap-2 mt-2 flex-wrap">
-            <button onclick="quickReply('Mañana (9h-12h)')" class="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-100 transition-colors">☀️ Mañana</button>
-            <button onclick="quickReply('Mediodía (12h-15h)')" class="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-100 transition-colors">🌤️ Mediodía</button>
-            <button onclick="quickReply('Por la tarde (15h-19h)')" class="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-100 transition-colors">🌆 Tarde</button>
+            <button onclick="quickReply('Mañana (9h-12h)')" class="text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-colors" style="background:#ede9fe;color:#64358F;">☀️ Mañana</button>
+            <button onclick="quickReply('Mediodía (12h-15h)')" class="text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-colors" style="background:#ede9fe;color:#64358F;">🌤️ Mediodía</button>
+            <button onclick="quickReply('Por la tarde (15h-19h)')" class="text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-colors" style="background:#ede9fe;color:#64358F;">🌆 Tarde</button>
           </div>
         </div>
       </div>
@@ -179,14 +179,13 @@
 
   <!-- FOOTER -->
   <footer class="text-center py-6 text-gray-400 text-xs">
-    <p>© 2025 Galia Digital · <a href="/panel" class="hover:text-purple-500 transition-colors">Panel interno</a></p>
+    <p>© 2025 GALia Belleza · Agencia de marketing para peluquerías</p>
   </footer>
 
   <script>
     let currentLeadId = null;
     let chatPhone = '';
 
-    // Enter key support
     document.getElementById('chatInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendChatMessage();
     });
@@ -203,37 +202,21 @@
       if (!message) return;
 
       chatPhone = phoneInput?.value?.trim() || chatPhone;
-
-      // Mostrar mensaje usuario
       appendMessage(message, 'user');
       input.value = '';
-
-      // Ocultar input teléfono después del primer mensaje
       if (phoneInput) phoneInput.style.display = 'none';
 
-      // Mostrar typing
       const typingId = showTyping();
-
       try {
         const res = await fetch('/lead-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message,
-            phone: chatPhone || null,
-            source: 'chat_web',
-            leadId: currentLeadId || undefined,
-          })
+          body: JSON.stringify({ message, phone: chatPhone || null, source: 'chat_web', leadId: currentLeadId || undefined })
         });
-
         const data = await res.json();
         removeTyping(typingId);
-
-        if (data.reply) {
-          currentLeadId = data.leadId;
-          appendMessage(data.reply, 'bot');
-        }
-      } catch (err) {
+        if (data.reply) { currentLeadId = data.leadId; appendMessage(data.reply, 'bot'); }
+      } catch {
         removeTyping(typingId);
         appendMessage('Lo sentimos, ha habido un error. Vuelve a intentarlo en un momento.', 'bot');
       }
@@ -243,18 +226,11 @@
       const container = document.getElementById('chatMessages');
       const div = document.createElement('div');
       div.className = `flex gap-2 mb-3 ${role === 'user' ? 'justify-end' : ''}`;
-
       if (role === 'bot') {
-        div.innerHTML = `
-          <div class="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-            <i class="fas fa-robot text-purple-600 text-xs"></i>
-          </div>
-          <div class="bubble-bot px-4 py-3 text-sm max-w-xs leading-relaxed">${escapeHtml(text)}</div>
-        `;
+        div.innerHTML = `<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-sm" style="background:#ede9fe;">🐙</div>
+          <div class="bubble-bot px-4 py-3 text-sm max-w-xs leading-relaxed">${esc(text)}</div>`;
       } else {
-        div.innerHTML = `
-          <div class="bubble-user px-4 py-3 text-sm max-w-xs leading-relaxed">${escapeHtml(text)}</div>
-        `;
+        div.innerHTML = `<div class="bubble-user px-4 py-3 text-sm max-w-xs leading-relaxed">${esc(text)}</div>`;
       }
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
@@ -264,30 +240,19 @@
       const container = document.getElementById('chatMessages');
       const id = 'typing-' + Date.now();
       const div = document.createElement('div');
-      div.id = id;
-      div.className = 'flex gap-2 mb-3';
-      div.innerHTML = `
-        <div class="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-          <i class="fas fa-robot text-purple-600 text-xs"></i>
-        </div>
+      div.id = id; div.className = 'flex gap-2 mb-3';
+      div.innerHTML = `<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-sm" style="background:#ede9fe;">🐙</div>
         <div class="bubble-bot px-4 py-3 flex gap-1 items-center">
-          <span class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></span>
-        </div>
-      `;
+          <span class="w-2 h-2 rounded-full typing-dot" style="background:#9ca3af;"></span>
+          <span class="w-2 h-2 rounded-full typing-dot" style="background:#9ca3af;"></span>
+          <span class="w-2 h-2 rounded-full typing-dot" style="background:#9ca3af;"></span>
+        </div>`;
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
       return id;
     }
-
-    function removeTyping(id) {
-      document.getElementById(id)?.remove();
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+    function removeTyping(id) { document.getElementById(id)?.remove(); }
+    function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     // Formulario rápido
     document.getElementById('quickForm').addEventListener('submit', async (e) => {
@@ -296,7 +261,6 @@
       const msg = document.getElementById('quickFormMsg');
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
-
       try {
         const res = await fetch('/register-lead', {
           method: 'POST',
@@ -310,15 +274,12 @@
             source: 'formulario_web',
           })
         });
-
         if (res.ok) {
           msg.className = 'mt-3 text-center text-sm text-green-600 font-medium';
           msg.textContent = '✅ ¡Perfecto! Te llamamos en la franja indicada. ¡Hasta pronto!';
           msg.classList.remove('hidden');
           e.target.reset();
-        } else {
-          throw new Error();
-        }
+        } else throw new Error();
       } catch {
         msg.className = 'mt-3 text-center text-sm text-red-500';
         msg.textContent = '❌ Error al enviar. Inténtalo de nuevo.';

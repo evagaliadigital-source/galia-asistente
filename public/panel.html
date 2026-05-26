@@ -3,400 +3,413 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Leads · Galia Belleza</title>
+  <title>Panel Interno · GALia Belleza</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { font-family: 'Inter', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); }
+
+    .gradient-bg  { background: linear-gradient(135deg, #64358F 0%, #26A7A1 100%); }
+    .gradient-btn { background: linear-gradient(135deg, #64358F 0%, #26A7A1 100%); }
+
     .status-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
-    .status-pendiente_llamar  { background: #fef3c7; color: #92400e; }
+    .status-pendiente_llamar   { background: #fef3c7; color: #92400e; }
     .status-llamada_programada { background: #dbeafe; color: #1e40af; }
-    .status-llamado    { background: #d1fae5; color: #065f46; }
-    .status-convertido { background: #c4b5fd; color: #4c1d95; }
-    .status-no_interesado { background: #f3f4f6; color: #6b7280; }
-    .status-no_contesta  { background: #fee2e2; color: #991b1b; }
+    .status-llamado            { background: #d1fae5; color: #065f46; }
+    .status-convertido         { background: #ede9fe; color: #4c1d95; }
+    .status-no_interesado      { background: #f3f4f6; color: #6b7280; }
+    .status-no_contesta        { background: #fee2e2; color: #991b1b; }
+
     .lead-card { transition: all 0.2s; }
     .lead-card:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-    .stat-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #f3f4f6; }
+
+    /* LOGIN OVERLAY */
+    #loginOverlay { backdrop-filter: blur(8px); }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <!-- HEADER -->
-  <header class="gradient-bg text-white py-4 px-6 shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-          <i class="fas fa-chart-line text-white"></i>
+<!-- ══════════════════════════════════ -->
+<!-- LOGIN OVERLAY                      -->
+<!-- ══════════════════════════════════ -->
+<div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(100,53,143,0.15);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+    <div class="gradient-bg p-6 text-center">
+      <img src="/logo-galia.png" alt="GALia Belleza" class="h-14 w-auto mx-auto mb-2" />
+      <p class="text-white/80 text-sm">Panel interno de captación</p>
+    </div>
+    <div class="p-6">
+      <p class="text-gray-600 text-sm mb-5 text-center">Acceso exclusivo para el equipo GALia</p>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Usuario</label>
+          <input type="text" id="loginUser" placeholder="eva / nuria / admin"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+            onkeydown="if(event.key==='Enter') doLogin()" />
         </div>
         <div>
-          <h1 class="font-bold text-lg">Panel de Leads · Galia Belleza</h1>
-          <p class="text-white/70 text-xs">Gestión interna de asesorías</p>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Contraseña</label>
+          <input type="password" id="loginPass" placeholder="••••••••"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+            onkeydown="if(event.key==='Enter') doLogin()" />
+        </div>
+        <p id="loginError" class="text-red-500 text-xs text-center hidden">Usuario o contraseña incorrectos</p>
+        <button onclick="doLogin()" class="gradient-btn w-full text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
+          <i class="fas fa-lock-open mr-2"></i>Entrar al panel
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 text-center mt-4">Solo acceso autorizado · GALia Belleza © 2025</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!-- CONTENIDO PANEL (oculto hasta login) -->
+<!-- ══════════════════════════════════ -->
+<div id="panelContent" class="hidden">
+
+  <!-- HEADER -->
+  <header class="gradient-bg text-white py-3 px-6 shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/logo-galia.png" alt="GALia" class="h-9 w-auto" />
+        <div>
+          <p class="font-bold text-sm">Panel de Captación</p>
+          <p class="text-white/60 text-xs">Gestión interna de leads</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="loadLeads()" class="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-lg transition-colors">
-          <i class="fas fa-sync-alt mr-2"></i>Actualizar
+        <span class="text-white/70 text-xs" id="welcomeUser"></span>
+        <button onclick="loadLeads()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+          <i class="fas fa-sync-alt mr-1"></i>Actualizar
         </button>
-        <a href="/" class="bg-white text-purple-700 text-sm px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors">
-          <i class="fas fa-external-link-alt mr-2"></i>Ver formulario
+        <a href="/" class="bg-white text-xs px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity" style="color:#64358F;">
+          <i class="fas fa-external-link-alt mr-1"></i>Formulario
         </a>
+        <button onclick="doLogout()" class="bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+          <i class="fas fa-sign-out-alt mr-1"></i>Salir
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
+  <main class="max-w-7xl mx-auto px-4 py-6">
 
     <!-- STATS -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8" id="statsRow">
-      <div class="stat-card text-center">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
         <p class="text-3xl font-bold text-gray-900" id="statTotal">—</p>
-        <p class="text-xs text-gray-500 mt-1">Total leads</p>
+        <p class="text-xs text-gray-400 mt-1">Total leads</p>
       </div>
-      <div class="stat-card text-center">
+      <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
         <p class="text-3xl font-bold text-amber-500" id="statPendiente">—</p>
-        <p class="text-xs text-gray-500 mt-1">Pendientes llamar</p>
+        <p class="text-xs text-gray-400 mt-1">Pendientes</p>
       </div>
-      <div class="stat-card text-center">
+      <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
         <p class="text-3xl font-bold text-blue-500" id="statProgramada">—</p>
-        <p class="text-xs text-gray-500 mt-1">Programadas</p>
+        <p class="text-xs text-gray-400 mt-1">Programadas</p>
       </div>
-      <div class="stat-card text-center">
-        <p class="text-3xl font-bold text-purple-600" id="statConvertido">—</p>
-        <p class="text-xs text-gray-500 mt-1">Convertidos</p>
+      <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+        <p class="text-3xl font-bold" style="color:#64358F;" id="statConvertido">—</p>
+        <p class="text-xs text-gray-400 mt-1">Convertidos</p>
       </div>
-      <div class="stat-card text-center">
-        <p class="text-3xl font-bold text-green-500" id="statHoy">—</p>
-        <p class="text-xs text-gray-500 mt-1">Hoy</p>
+      <div class="bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+        <p class="text-3xl font-bold" style="color:#26A7A1;" id="statHoy">—</p>
+        <p class="text-xs text-gray-400 mt-1">Hoy</p>
       </div>
     </div>
 
-    <!-- FILTROS -->
-    <div class="flex flex-wrap gap-2 mb-6">
-      <span class="text-sm text-gray-500 self-center mr-2">Filtrar:</span>
-      <button onclick="filterLeads('todos')" class="filter-btn active text-sm px-4 py-2 rounded-lg bg-purple-600 text-white transition-colors" data-filter="todos">Todos</button>
-      <button onclick="filterLeads('pendiente_llamar')" class="filter-btn text-sm px-4 py-2 rounded-lg bg-white text-gray-600 border border-gray-200 hover:border-purple-300 transition-colors" data-filter="pendiente_llamar">🔔 Pendientes</button>
-      <button onclick="filterLeads('llamada_programada')" class="filter-btn text-sm px-4 py-2 rounded-lg bg-white text-gray-600 border border-gray-200 hover:border-purple-300 transition-colors" data-filter="llamada_programada">📅 Programadas</button>
-      <button onclick="filterLeads('llamado')" class="filter-btn text-sm px-4 py-2 rounded-lg bg-white text-gray-600 border border-gray-200 hover:border-purple-300 transition-colors" data-filter="llamado">✅ Llamados</button>
-      <button onclick="filterLeads('convertido')" class="filter-btn text-sm px-4 py-2 rounded-lg bg-white text-gray-600 border border-gray-200 hover:border-purple-300 transition-colors" data-filter="convertido">🎯 Convertidos</button>
-      <button onclick="filterLeads('no_interesado')" class="filter-btn text-sm px-4 py-2 rounded-lg bg-white text-gray-600 border border-gray-200 hover:border-purple-300 transition-colors" data-filter="no_interesado">❌ No interesado</button>
-      
-      <!-- Buscador -->
+    <!-- FILTROS + BÚSQUEDA -->
+    <div class="flex flex-wrap gap-2 mb-5 items-center">
+      <span class="text-sm text-gray-400 mr-1">Filtrar:</span>
+      <button onclick="filterLeads('todos')" class="filter-btn text-xs px-3 py-1.5 rounded-lg transition-colors active-filter" data-filter="todos">Todos</button>
+      <button onclick="filterLeads('pendiente_llamar')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="pendiente_llamar">🔔 Pendientes</button>
+      <button onclick="filterLeads('llamada_programada')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="llamada_programada">📅 Programadas</button>
+      <button onclick="filterLeads('llamado')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="llamado">✅ Llamados</button>
+      <button onclick="filterLeads('convertido')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="convertido">🎯 Convertidos</button>
+      <button onclick="filterLeads('no_interesado')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="no_interesado">❌ No interesado</button>
       <div class="ml-auto">
-        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, salón o zona..." 
-          class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 w-64" 
-          oninput="searchLeads(this.value)" />
+        <input type="text" placeholder="🔍 Buscar nombre, salón, zona..."
+          class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 w-56"
+          style="--tw-ring-color:#64358F" oninput="searchLeads(this.value)" />
       </div>
     </div>
 
-    <!-- LEADS LIST -->
+    <!-- LEADS -->
     <div id="leadsList" class="space-y-3">
       <div class="text-center py-12 text-gray-400">
-        <i class="fas fa-spinner fa-spin text-2xl mb-3 block"></i>
+        <i class="fas fa-spinner fa-spin text-2xl mb-3 block" style="color:#64358F;"></i>
         <p>Cargando leads...</p>
       </div>
     </div>
-
-    <p class="text-center text-xs text-gray-400 mt-6" id="leadsCount"></p>
+    <p class="text-center text-xs text-gray-400 mt-4" id="leadsCount"></p>
   </main>
+</div>
 
-  <!-- MODAL DETALLE -->
-  <div id="leadModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-      <div class="gradient-bg p-5 rounded-t-2xl flex items-center justify-between">
-        <h3 class="text-white font-bold text-lg" id="modalTitle">Detalle del lead</h3>
-        <button onclick="closeModal()" class="text-white/80 hover:text-white">
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-      <div class="p-6" id="modalContent"></div>
+<!-- MODAL DETALLE -->
+<div id="leadModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="gradient-bg p-5 rounded-t-2xl flex items-center justify-between">
+      <h3 class="text-white font-bold text-lg" id="modalTitle">Detalle del lead</h3>
+      <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button>
     </div>
+    <div class="p-6" id="modalContent"></div>
   </div>
+</div>
 
-  <script>
-    let allLeads = [];
-    let currentFilter = 'todos';
+<style>
+  .active-filter { color: white !important; }
+  .filter-btn { background: white; color: #6b7280; border: 1px solid #e5e7eb; }
+  .filter-btn.active-filter { background: linear-gradient(135deg, #64358F, #26A7A1) !important; border-color: transparent; }
+</style>
 
-    async function loadLeads() {
-      try {
-        const res = await fetch('/leads');
-        const data = await res.json();
-        allLeads = data.leads || [];
-        updateStats(allLeads);
-        renderLeads(allLeads);
-      } catch (err) {
-        document.getElementById('leadsList').innerHTML = `
-          <div class="text-center py-12 text-red-400">
-            <i class="fas fa-exclamation-triangle text-2xl mb-3 block"></i>
-            <p>Error al cargar leads. Verifica que el servidor esté activo.</p>
-          </div>`;
-      }
+<script>
+  // ── USUARIOS VÁLIDOS (frontend-only — para producción real usa backend auth) ──
+  const USERS = {
+    'eva':   { pass: 'galia2025', name: 'Eva 👑' },
+    'nuria': { pass: 'galia2025', name: 'Nuria ✨' },
+    'admin': { pass: 'galiaadmin', name: 'Admin 🔧' },
+  };
+
+  // ── LOGIN ──────────────────────────────────────
+  function doLogin() {
+    const user = document.getElementById('loginUser').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+    const err  = document.getElementById('loginError');
+
+    if (USERS[user] && USERS[user].pass === pass) {
+      sessionStorage.setItem('galia_user', user);
+      sessionStorage.setItem('galia_name', USERS[user].name);
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('panelContent').classList.remove('hidden');
+      document.getElementById('welcomeUser').textContent = 'Hola, ' + USERS[user].name;
+      err.classList.add('hidden');
+      loadLeads();
+    } else {
+      err.classList.remove('hidden');
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginPass').focus();
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.clear();
+    document.getElementById('loginOverlay').classList.remove('hidden');
+    document.getElementById('panelContent').classList.add('hidden');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+
+  // Auto-login si ya hay sesión
+  window.addEventListener('DOMContentLoaded', () => {
+    const user = sessionStorage.getItem('galia_user');
+    const name = sessionStorage.getItem('galia_name');
+    if (user && USERS[user]) {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('panelContent').classList.remove('hidden');
+      document.getElementById('welcomeUser').textContent = 'Hola, ' + name;
+      loadLeads();
+    }
+    // Focus en usuario al cargar
+    document.getElementById('loginUser').focus();
+  });
+
+  // ── DATOS ──────────────────────────────────────
+  let allLeads = [];
+  let currentFilter = 'todos';
+
+  async function loadLeads() {
+    try {
+      const res = await fetch('/leads', { headers: { 'Referer': window.location.href } });
+      const data = await res.json();
+      allLeads = data.leads || [];
+      updateStats(allLeads);
+      renderLeads(allLeads);
+    } catch {
+      document.getElementById('leadsList').innerHTML = `
+        <div class="text-center py-12 text-red-400">
+          <i class="fas fa-exclamation-triangle text-2xl mb-3 block"></i>
+          <p>Error al cargar. Verifica que el servidor esté activo.</p>
+        </div>`;
+    }
+  }
+
+  function updateStats(leads) {
+    const today = new Date().toDateString();
+    document.getElementById('statTotal').textContent = leads.length;
+    document.getElementById('statPendiente').textContent = leads.filter(l => l.status === 'pendiente_llamar').length;
+    document.getElementById('statProgramada').textContent = leads.filter(l => l.status === 'llamada_programada').length;
+    document.getElementById('statConvertido').textContent = leads.filter(l => l.status === 'convertido').length;
+    document.getElementById('statHoy').textContent = leads.filter(l => new Date(l.createdAt).toDateString() === today).length;
+  }
+
+  function renderLeads(leads) {
+    const container = document.getElementById('leadsList');
+    if (!leads.length) {
+      container.innerHTML = `<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-3xl mb-3 block"></i><p>No hay leads con este filtro</p></div>`;
+      document.getElementById('leadsCount').textContent = '';
+      return;
     }
 
-    function updateStats(leads) {
-      const today = new Date().toDateString();
-      document.getElementById('statTotal').textContent = leads.length;
-      document.getElementById('statPendiente').textContent = leads.filter(l => l.status === 'pendiente_llamar').length;
-      document.getElementById('statProgramada').textContent = leads.filter(l => l.status === 'llamada_programada').length;
-      document.getElementById('statConvertido').textContent = leads.filter(l => l.status === 'convertido').length;
-      document.getElementById('statHoy').textContent = leads.filter(l => new Date(l.createdAt).toDateString() === today).length;
-    }
-
-    function renderLeads(leads) {
-      const container = document.getElementById('leadsList');
-      if (leads.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 text-gray-400">
-            <i class="fas fa-inbox text-3xl mb-3 block"></i>
-            <p>No hay leads con este filtro</p>
-          </div>`;
-        document.getElementById('leadsCount').textContent = '';
-        return;
-      }
-
-      container.innerHTML = leads.map(lead => `
-        <div class="lead-card bg-white rounded-xl border border-gray-100 shadow-sm p-5 cursor-pointer" onclick="showDetail('${lead.id}')">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-sm">${(lead.name || lead.salonName || '?').charAt(0).toUpperCase()}</span>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900 text-sm">${lead.name || '<span class="text-gray-400 italic">Sin nombre</span>'}</p>
-                  <p class="text-purple-600 text-xs font-medium">${lead.salonName || '<span class="text-gray-400">Salón sin especificar</span>'}</p>
-                </div>
-                <span class="status-badge status-${lead.status} ml-auto">${formatStatus(lead.status)}</span>
+    container.innerHTML = leads.map(lead => `
+      <div class="lead-card bg-white rounded-xl border border-gray-100 shadow-sm p-5 cursor-pointer" onclick="showDetail('${lead.id}')">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm" style="background:linear-gradient(135deg,#64358F,#26A7A1);">
+                ${(lead.name || lead.salonName || '?').charAt(0).toUpperCase()}
               </div>
-              
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-600">
-                <div class="flex items-center gap-1.5">
-                  <i class="fas fa-map-marker-alt text-purple-400"></i>
-                  <span>${lead.zone || '—'}</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <i class="fas fa-phone text-purple-400"></i>
-                  <span>${lead.phone || '—'}</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <i class="fas fa-clock text-purple-400"></i>
-                  <span>${lead.preferredTime || 'Sin confirmar'}</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <i class="fas fa-tag text-purple-400"></i>
-                  <span>${formatSource(lead.source)}</span>
-                </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">${lead.name || '<span class="text-gray-400 italic text-xs">Sin nombre</span>'}</p>
+                <p class="text-xs font-medium" style="color:#64358F;">${lead.salonName || '<span class="text-gray-400">Salón sin especificar</span>'}</p>
               </div>
-              
-              ${lead.lastMessage ? `
-                <div class="mt-3 bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-500 italic truncate">
-                  💬 "${lead.lastMessage}"
-                </div>
-              ` : ''}
+              <span class="status-badge status-${lead.status} ml-auto">${fmtStatus(lead.status)}</span>
             </div>
-            
-            <div class="text-right flex-shrink-0">
-              <p class="text-xs text-gray-400">${formatDate(lead.createdAt)}</p>
-              <div class="mt-3 flex flex-col gap-1.5" onclick="event.stopPropagation()">
-                ${lead.phone ? `
-                  <a href="tel:${lead.phone}" class="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors text-center">
-                    <i class="fas fa-phone-alt mr-1"></i>Llamar
-                  </a>
-                ` : ''}
-                <button onclick="quickStatus('${lead.id}', 'llamado')" class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
-                  ✅ Marcar llamado
-                </button>
-                <button onclick="quickStatus('${lead.id}', 'convertido')" class="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors">
-                  🎯 Convertido
-                </button>
-              </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
+              <span><i class="fas fa-map-marker-alt mr-1" style="color:#26A7A1;"></i>${lead.zone || '—'}</span>
+              <span><i class="fas fa-phone mr-1" style="color:#26A7A1;"></i>${lead.phone || '—'}</span>
+              <span><i class="fas fa-clock mr-1" style="color:#26A7A1;"></i>${lead.preferredTime || 'Sin confirmar'}</span>
+              <span><i class="fas fa-tag mr-1" style="color:#26A7A1;"></i>${fmtSource(lead.source)}</span>
+            </div>
+            ${lead.lastMessage ? `<div class="mt-2 bg-gray-50 rounded-lg px-3 py-1.5 text-xs text-gray-400 italic truncate">💬 "${lead.lastMessage}"</div>` : ''}
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="text-xs text-gray-400">${fmtDate(lead.createdAt)}</p>
+            <div class="mt-2 flex flex-col gap-1.5" onclick="event.stopPropagation()">
+              ${lead.phone ? `<a href="tel:${lead.phone}" class="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors text-center"><i class="fas fa-phone-alt mr-1"></i>Llamar</a>` : ''}
+              <button onclick="quickStatus('${lead.id}','llamado')" class="text-xs px-3 py-1.5 rounded-lg transition-colors text-center" style="background:#ede9fe;color:#64358F;">✅ Llamado</button>
+              <button onclick="quickStatus('${lead.id}','convertido')" class="text-xs px-3 py-1.5 rounded-lg transition-colors text-center" style="background:#d1fae5;color:#065f46;">🎯 Convertido</button>
             </div>
           </div>
         </div>
-      `).join('');
+      </div>
+    `).join('');
 
-      document.getElementById('leadsCount').textContent = `Mostrando ${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
-    }
+    document.getElementById('leadsCount').textContent = `Mostrando ${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+  }
 
-    function filterLeads(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.className = btn.className.replace('bg-purple-600 text-white', 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300');
-      });
-      document.querySelector(`[data-filter="${filter}"]`).className = 
-        document.querySelector(`[data-filter="${filter}"]`).className.replace('bg-white text-gray-600 border border-gray-200 hover:border-purple-300', 'bg-purple-600 text-white');
+  function filterLeads(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+    document.querySelector(`[data-filter="${f}"]`).classList.add('active-filter');
+    renderLeads(f === 'todos' ? allLeads : allLeads.filter(l => l.status === f));
+  }
 
-      const filtered = filter === 'todos' ? allLeads : allLeads.filter(l => l.status === filter);
-      renderLeads(filtered);
-    }
+  function searchLeads(q) {
+    if (!q) return filterLeads(currentFilter);
+    const qL = q.toLowerCase();
+    renderLeads(allLeads.filter(l =>
+      (l.name||'').toLowerCase().includes(qL) ||
+      (l.salonName||'').toLowerCase().includes(qL) ||
+      (l.zone||'').toLowerCase().includes(qL) ||
+      (l.phone||'').includes(qL)
+    ));
+  }
 
-    function searchLeads(query) {
-      if (!query) return filterLeads(currentFilter);
-      const q = query.toLowerCase();
-      const filtered = allLeads.filter(l =>
-        (l.name || '').toLowerCase().includes(q) ||
-        (l.salonName || '').toLowerCase().includes(q) ||
-        (l.zone || '').toLowerCase().includes(q) ||
-        (l.phone || '').includes(q) ||
-        (l.lastMessage || '').toLowerCase().includes(q)
-      );
-      renderLeads(filtered);
-    }
-
-    async function quickStatus(id, status) {
-      try {
-        await fetch(`/leads/${id}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-        await loadLeads();
-      } catch (err) {
-        alert('Error al actualizar estado');
-      }
-    }
-
-    function showDetail(id) {
-      const lead = allLeads.find(l => l.id === id);
-      if (!lead) return;
-
-      document.getElementById('modalTitle').textContent = lead.salonName || lead.name || 'Lead sin nombre';
-      document.getElementById('modalContent').innerHTML = `
-        <div class="space-y-4">
-          <!-- Datos principales -->
-          <div class="grid grid-cols-2 gap-4">
-            <div><p class="text-xs text-gray-500 mb-1">Nombre</p><p class="font-medium text-gray-900">${lead.name || '—'}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Salón</p><p class="font-medium text-purple-600">${lead.salonName || '—'}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Zona</p><p class="font-medium">${lead.zone || '—'}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Teléfono</p><p class="font-medium">${lead.phone ? `<a href="tel:${lead.phone}" class="text-blue-600 hover:underline">${lead.phone}</a>` : '—'}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Franja horaria</p><p class="font-medium text-amber-700">${lead.preferredTime || 'Sin confirmar'}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Fuente</p><p class="font-medium">${formatSource(lead.source)}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Entrada</p><p class="font-medium text-xs">${formatDate(lead.createdAt)}</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Actualizado</p><p class="font-medium text-xs">${formatDate(lead.updatedAt)}</p></div>
-          </div>
-
-          <!-- Estado actual -->
-          <div>
-            <p class="text-xs text-gray-500 mb-2">Estado actual</p>
-            <span class="status-badge status-${lead.status} text-sm">${formatStatus(lead.status)}</span>
-          </div>
-
-          <!-- Cambiar estado -->
-          <div class="bg-gray-50 rounded-xl p-4">
-            <p class="text-xs text-gray-500 mb-3 font-medium">CAMBIAR ESTADO</p>
-            <div class="flex flex-wrap gap-2">
-              ${['pendiente_llamar','llamada_programada','llamado','convertido','no_interesado','no_contesta'].map(s => `
-                <button onclick="quickStatus('${lead.id}', '${s}')" 
-                  class="text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-purple-50 hover:border-purple-300 transition-colors ${lead.status === s ? 'bg-purple-100 border-purple-400 font-semibold' : ''}">
-                  ${formatStatus(s)}
-                </button>
-              `).join('')}
-            </div>
-          </div>
-
-          <!-- Notas -->
-          <div>
-            <p class="text-xs text-gray-500 mb-2">Notas internas</p>
-            <textarea id="leadNotes" rows="3" placeholder="Añade notas sobre este lead..."
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200">${lead.notes || ''}</textarea>
-            <button onclick="saveNotes('${lead.id}')" class="mt-2 text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-              Guardar notas
-            </button>
-          </div>
-
-          <!-- Conversación -->
-          ${lead.conversationHistory && lead.conversationHistory.length > 0 ? `
-            <div>
-              <p class="text-xs text-gray-500 mb-3 font-medium">CONVERSACIÓN COMPLETA</p>
-              <div class="space-y-2 bg-gray-50 rounded-xl p-4 max-h-64 overflow-y-auto">
-                ${lead.conversationHistory.map(msg => `
-                  <div class="${msg.role === 'user' ? 'text-right' : ''}">
-                    <span class="inline-block text-xs px-3 py-2 rounded-xl max-w-xs text-left ${msg.role === 'user' ? 'bg-purple-100 text-purple-900' : 'bg-white border border-gray-200 text-gray-700'}">
-                      ${msg.content}
-                    </span>
-                    <p class="text-xs text-gray-400 mt-0.5">${msg.role === 'user' ? 'Cliente' : '🤖 Asistente'}</p>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- Acciones rápidas -->
-          ${lead.phone ? `
-            <div class="flex gap-3 pt-2 border-t border-gray-100">
-              <a href="tel:${lead.phone}" class="flex-1 bg-green-600 text-white text-sm py-3 rounded-xl text-center hover:bg-green-700 transition-colors font-medium">
-                <i class="fas fa-phone-alt mr-2"></i>Llamar ahora
-              </a>
-              <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g,'')}" target="_blank" class="flex-1 bg-[#25D366] text-white text-sm py-3 rounded-xl text-center hover:opacity-90 transition-opacity font-medium">
-                <i class="fab fa-whatsapp mr-2"></i>WhatsApp
-              </a>
-            </div>
-          ` : ''}
-        </div>
-      `;
-      document.getElementById('leadModal').classList.remove('hidden');
-    }
-
-    async function saveNotes(id) {
-      const notes = document.getElementById('leadNotes').value;
-      const lead = allLeads.find(l => l.id === id);
-      await fetch(`/leads/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: lead.status, notes })
-      });
-      closeModal();
-      await loadLeads();
-    }
-
-    function closeModal() {
-      document.getElementById('leadModal').classList.add('hidden');
-    }
-
-    // Cerrar modal al hacer click fuera
-    document.getElementById('leadModal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('leadModal')) closeModal();
+  async function quickStatus(id, status) {
+    await fetch(`/leads/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
     });
+    await loadLeads();
+  }
 
-    function formatStatus(status) {
-      const map = {
-        'pendiente_llamar': '🔔 Pendiente llamar',
-        'llamada_programada': '📅 Llamada programada',
-        'llamado': '✅ Llamado',
-        'convertido': '🎯 Convertido',
-        'no_interesado': '❌ No interesado',
-        'no_contesta': '📵 No contesta',
-      };
-      return map[status] || status;
-    }
+  function showDetail(id) {
+    const lead = allLeads.find(l => l.id === id);
+    if (!lead) return;
+    document.getElementById('modalTitle').textContent = lead.salonName || lead.name || 'Lead';
+    document.getElementById('modalContent').innerHTML = `
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div><p class="text-xs text-gray-400 mb-0.5">Nombre</p><p class="font-semibold">${lead.name||'—'}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Salón</p><p class="font-semibold" style="color:#64358F;">${lead.salonName||'—'}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Zona</p><p class="font-semibold">${lead.zone||'—'}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Teléfono</p><p class="font-semibold">${lead.phone ? `<a href="tel:${lead.phone}" class="text-blue-600 hover:underline">${lead.phone}</a>` : '—'}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Franja horaria</p><p class="font-semibold text-amber-700">${lead.preferredTime||'Sin confirmar'}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Fuente</p><p class="font-semibold">${fmtSource(lead.source)}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Entrada</p><p class="text-xs">${fmtDate(lead.createdAt)}</p></div>
+          <div><p class="text-xs text-gray-400 mb-0.5">Actualizado</p><p class="text-xs">${fmtDate(lead.updatedAt)}</p></div>
+        </div>
 
-    function formatSource(source) {
-      const map = {
-        'web': '🌐 Web',
-        'chat_web': '💬 Chat web',
-        'whatsapp': '📱 WhatsApp',
-        'formulario_web': '📝 Formulario',
-        'formulario': '📝 Formulario',
-      };
-      return map[source] || source;
-    }
+        <div>
+          <p class="text-xs text-gray-400 mb-2">Estado actual</p>
+          <span class="status-badge status-${lead.status}">${fmtStatus(lead.status)}</span>
+        </div>
 
-    function formatDate(iso) {
-      if (!iso) return '—';
-      const d = new Date(iso);
-      return d.toLocaleString('es-ES', { 
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-        timeZone: 'Europe/Madrid'
-      });
-    }
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Cambiar estado</p>
+          <div class="flex flex-wrap gap-2">
+            ${['pendiente_llamar','llamada_programada','llamado','convertido','no_interesado','no_contesta'].map(s => `
+              <button onclick="quickStatus('${lead.id}','${s}')" onclick="closeModal()"
+                class="text-xs px-3 py-1.5 rounded-lg border transition-colors ${lead.status===s ? 'font-bold border-purple-400 bg-purple-50' : 'border-gray-200 bg-white hover:bg-gray-50'}">
+                ${fmtStatus(s)}
+              </button>`).join('')}
+          </div>
+        </div>
 
-    // Auto-refresh cada 30 segundos
-    loadLeads();
-    setInterval(loadLeads, 30000);
-  </script>
+        <div>
+          <p class="text-xs text-gray-400 mb-2">Notas internas</p>
+          <textarea id="leadNotes" rows="2" placeholder="Añade notas..."
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1">${lead.notes||''}</textarea>
+          <button onclick="saveNotes('${lead.id}')" class="mt-2 text-sm text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity" style="background:#64358F;">Guardar notas</button>
+        </div>
+
+        ${lead.conversationHistory?.length ? `
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Conversación</p>
+            <div class="space-y-2 bg-gray-50 rounded-xl p-4 max-h-56 overflow-y-auto">
+              ${lead.conversationHistory.map(m => `
+                <div class="${m.role==='user'?'text-right':''}">
+                  <span class="inline-block text-xs px-3 py-2 rounded-xl max-w-xs text-left ${m.role==='user'?'text-white':'bg-white border border-gray-200 text-gray-700'}" style="${m.role==='user'?'background:#64358F;':''}">
+                    ${m.content}
+                  </span>
+                  <p class="text-xs text-gray-400 mt-0.5">${m.role==='user'?'Cliente':'🐙 Asistente'}</p>
+                </div>`).join('')}
+            </div>
+          </div>` : ''}
+
+        ${lead.phone ? `
+          <div class="flex gap-3 pt-2 border-t border-gray-100">
+            <a href="tel:${lead.phone}" class="flex-1 bg-green-600 text-white text-sm py-3 rounded-xl text-center hover:bg-green-700 transition-colors font-medium">
+              <i class="fas fa-phone-alt mr-2"></i>Llamar ahora
+            </a>
+            <a href="https://wa.me/${lead.phone.replace(/[^0-9]/g,'')}" target="_blank" class="flex-1 text-white text-sm py-3 rounded-xl text-center hover:opacity-90 transition-opacity font-medium" style="background:#25D366;">
+              <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+            </a>
+          </div>` : ''}
+      </div>`;
+    document.getElementById('leadModal').classList.remove('hidden');
+  }
+
+  async function saveNotes(id) {
+    const notes = document.getElementById('leadNotes').value;
+    const lead = allLeads.find(l => l.id === id);
+    await fetch(`/leads/${id}/status`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: lead.status, notes })
+    });
+    closeModal(); await loadLeads();
+  }
+
+  function closeModal() { document.getElementById('leadModal').classList.add('hidden'); }
+  document.getElementById('leadModal').addEventListener('click', e => { if (e.target === document.getElementById('leadModal')) closeModal(); });
+
+  // ── UTILS ───────────────────────────────────────
+  function fmtStatus(s) {
+    return { pendiente_llamar:'🔔 Pendiente', llamada_programada:'📅 Programada', llamado:'✅ Llamado', convertido:'🎯 Convertido', no_interesado:'❌ No interesado', no_contesta:'📵 No contesta' }[s] || s;
+  }
+  function fmtSource(s) {
+    return { web:'🌐 Web', chat_web:'💬 Chat', whatsapp:'📱 WhatsApp', formulario_web:'📝 Formulario', formulario:'📝 Formulario', test_prueba:'🧪 Test' }[s] || s;
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid' });
+  }
+
+  setInterval(loadLeads, 30000);
+</script>
 </body>
 </html>
