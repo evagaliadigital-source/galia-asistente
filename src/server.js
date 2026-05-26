@@ -328,6 +328,10 @@ app.get("/panel", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/panel.html"));
 });
 
+app.get("/test", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/test.html"));
+});
+
 // ─────────────────────────────────────────────
 // ARRANQUE
 // ─────────────────────────────────────────────

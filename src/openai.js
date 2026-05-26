@@ -1,81 +1,117 @@
 /**
  * Galia Belleza - Módulo OpenAI
- * Genera respuestas del asistente de captación usando la Responses API
+ * Usa el proxy de Genspark con GSK_API_KEY
  */
 
 import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import fs from "fs";
+import yaml from "js-yaml";
+import os from "os";
+import path from "path";
 
 // ─────────────────────────────────────────────
-// PROMPT DEL ASISTENTE - NO TOCAR SIN AVISAR
+// CONFIGURACIÓN — prioridad: GSK_API_KEY > yaml > env
 // ─────────────────────────────────────────────
-const SYSTEM_PROMPT = `
-Eres el asistente de Galia Belleza.
+function loadOpenAIConfig() {
+  const BASE_URL = "https://www.genspark.ai/api/llm_proxy/v1";
+
+  // 1. GSK_API_KEY es la clave correcta para el proxy de Genspark
+  if (process.env.GSK_API_KEY) {
+    return { apiKey: process.env.GSK_API_KEY, baseURL: BASE_URL };
+  }
+
+  // 2. Leer yaml — expandir ${GENSPARK_TOKEN} si es literal
+  const configPath = path.join(os.homedir(), ".genspark_llm.yaml");
+  if (fs.existsSync(configPath)) {
+    try {
+      const raw = fs.readFileSync(configPath, "utf8");
+      const config = yaml.load(raw);
+      let apiKey = config?.openai?.api_key || "";
+      // Expandir referencia literal al token
+      if (apiKey.includes("${GENSPARK_TOKEN}")) {
+        apiKey = process.env.GSK_API_KEY || process.env.GENSPARK_TOKEN || "";
+      }
+      if (apiKey && !apiKey.includes("${")) {
+        return { apiKey, baseURL: config?.openai?.base_url || BASE_URL };
+      }
+    } catch (_) {}
+  }
+
+  // 3. Fallback a variables de entorno
+  return {
+    apiKey: process.env.GSK_API_KEY || process.env.GENSPARK_TOKEN || process.env.OPENAI_API_KEY || "",
+    baseURL: process.env.OPENAI_BASE_URL || BASE_URL,
+  };
+}
+
+const { apiKey, baseURL } = loadOpenAIConfig();
+
+const client = new OpenAI({ apiKey, baseURL });
+
+console.log(`🤖 OpenAI proxy | ${baseURL} | key: ${apiKey?.slice(0,12)}...`);
+
+// ─────────────────────────────────────────────
+// PROMPT DEL ASISTENTE
+// Objetivo único: conseguir hora + salón + zona
+// NO vender · NO precios · NO diagnósticos
+// ─────────────────────────────────────────────
+const SYSTEM_PROMPT = `Eres el asistente de Galia Belleza.
 Tu única función es atender a personas interesadas en una asesoría gratuita para negocios de belleza: peluquerías, barberías, centros de estética, uñas, maquillaje o salones.
 
-OBJETIVO ÚNICO:
-Conseguir de forma natural la hora o franja horaria en la que la persona quiere ser llamada.
+OBJETIVO ÚNICO: Conseguir estos tres datos de forma natural: hora o franja preferida para llamada, nombre del salón, y zona o ciudad.
 
-FLUJO EXACTO:
-1. Si es el primer mensaje → Agradece, explica que la asesoría es gratuita (15 min), que revisáis el salón y le dais un plan sencillo. Pregunta a qué hora le viene bien hoy o mañana.
-2. Si da una hora o franja → Pide nombre del salón y zona/ciudad.
-3. Si ya tienes hora + salón + zona → Confirma que lo pasas al equipo y que les llamarán pronto. Fin.
+FLUJO EXACTO (sigue este orden siempre):
+1. Primer mensaje → Agradece brevemente. Di que la asesoría es gratuita, dura 15 minutos y que le daréis un plan de mejora sencillo. Pregunta: ¿a qué hora le viene mejor que le llamemos hoy o mañana?
+2. Si da hora o franja (ej: "por la tarde", "a las 11", "mañana") → Confirma con "perfecto" y pide nombre del salón y en qué zona o ciudad está.
+3. Si ya tienes los tres datos → Confirma que ya lo has pasado al equipo y que le llamarán en esa franja. Cierra con calidez. No pidas nada más.
 
 REGLAS ABSOLUTAS:
-- Responde SIEMPRE en 2-3 frases máximo. Nunca más.
-- No vendas. No expliques servicios. No hables de precios.
-- No prometas resultados concretos. No hagas diagnósticos.
-- No inventes disponibilidad concreta de horarios.
-- Si pregunta algo, responde en una frase y vuelve a pedir la hora.
-- Si no sabe qué decir, ofrece tres franjas: mañana (9h-12h), mediodía (12h-15h) o tarde (15h-19h).
-- Usa emojis con moderación (máximo 1-2 por mensaje).
+- Máximo 2-3 frases por respuesta. NUNCA más.
+- No vendas. No menciones precios. No expliques servicios.
+- No prometas resultados específicos ni garantices nada.
+- No inventes horarios concretos disponibles.
+- Si te preguntan algo fuera del tema → responde en una frase y vuelve a pedir la hora.
+- Si no saben cuándo → ofrece: mañana (9h-12h), mediodía (12h-15h) o tarde (15h-19h).
+- Tutea siempre. Español de España. Tono cercano y natural.
+- Máximo 1-2 emojis por mensaje, nunca más.
 
-TONO:
-Cercano, natural, profesional. Español de España. Tutea siempre.
+EJEMPLOS:
+Persona: "Hola, me interesa la asesoría"
+Tú: "¡Genial, gracias por escribir! 😊 La asesoría es gratuita y dura unos 15 minutos — echamos un vistazo a tu salón y te damos un plan sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?"
 
-EJEMPLOS DE RESPUESTAS CORRECTAS:
+Persona: "Por la tarde mejor"
+Tú: "Perfecto, tarde anotado 👍 ¿Cómo se llama tu salón y en qué zona o ciudad estás?"
 
-Usuario: "Hola, me interesa la asesoría"
-Asistente: "¡Genial! Gracias por escribir a Galia Belleza 😊 La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?"
+Persona: "Peluquería Lucía, en Alcorcón"
+Tú: "¡Listo! Ya lo paso al equipo con todos los datos. Os llamaremos esta tarde sin falta. ¡Hasta pronto!"
 
-Usuario: "Por la tarde mejor"
-Asistente: "Perfecto, tarde anotado 👍 ¿Cómo se llama tu salón y en qué zona o ciudad estás?"
-
-Usuario: "Peluquería Marta, en Leganés"
-Asistente: "¡Perfecto! Ya lo paso al equipo con todos los datos. Os llamaremos esta tarde. ¡Hasta pronto!"
-`;
+Persona: "¿Cuánto cuesta?"
+Tú: "La asesoría es completamente gratuita, sin compromiso. ¿A qué hora te viene bien que te llamemos?"`;
 
 /**
- * Genera una respuesta del asistente basada en el historial de conversación.
- * @param {Array} conversationHistory - Array de mensajes [{role, content}]
+ * Genera respuesta del asistente con historial de conversación.
+ * @param {Array} conversationHistory - [{role: "user"|"assistant", content: string}]
  * @param {string} userMessage - Último mensaje del usuario
- * @returns {Promise<string>} - Texto de respuesta
+ * @returns {Promise<string>}
  */
 export async function generateLeadReply(conversationHistory = [], userMessage) {
   try {
-    // Construimos el array de mensajes completo
-    const messages = [
-      ...conversationHistory,
-      { role: "user", content: userMessage },
-    ];
-
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        ...messages,
+        ...conversationHistory,
+        { role: "user", content: userMessage },
       ],
-      max_tokens: 200,
+      max_tokens: 500,  // gpt-5-mini usa reasoning tokens internamente
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content;
+    const reply = response.choices[0].message.content?.trim();
+    console.log(`💬 Usuario: "${userMessage.slice(0,50)}" → Bot: "${reply?.slice(0,80)}"`);
+    return reply;
   } catch (error) {
-    console.error("❌ Error OpenAI:", error.message);
-    // Fallback si falla la API — no deja al lead sin respuesta
-    return "¡Gracias por escribirnos! En estos momentos tenemos un pequeño problema técnico. Te responderemos enseguida. 🙏";
+    console.error("❌ Error OpenAI:", error.status || "", error.message);
+    return "¡Gracias por escribirnos! En este momento tenemos un pequeño problema técnico. Te contestamos en seguida 🙏";
   }
 }

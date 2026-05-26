@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧪 Test Asistente · Galia Belleza</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+
+    /* Chat bubbles */
+    .bubble-user { background: #7c3aed; color: white; border-radius: 18px 18px 4px 18px; }
+    .bubble-bot  { background: #f3f4f6; color: #1f2937; border-radius: 18px 18px 18px 4px; border: 1px solid #e5e7eb; }
+
+    /* Typing animation */
+    .dot { width: 7px; height: 7px; background: #9ca3af; border-radius: 50%; animation: bounce 1.4s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+    /* Scrollbars */
+    .chat-scroll { scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+    .chat-scroll::-webkit-scrollbar { width: 4px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+    /* Data collected pill */
+    .data-pill { transition: all 0.3s; }
+    .data-pill.filled { background: #ede9fe; border-color: #7c3aed; color: #5b21b6; }
+    .data-pill.empty  { background: #f9fafb; border-color: #e5e7eb; color: #9ca3af; }
+
+    /* Status indicator */
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse-green 2s infinite; }
+    @keyframes pulse-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Quick message buttons */
+    .qmsg { transition: all 0.15s; cursor: pointer; }
+    .qmsg:hover { transform: translateY(-1px); }
+
+    .gradient-header { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+    .gradient-btn    { background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- CABECERA                                   -->
+<!-- ══════════════════════════════════════════ -->
+<header class="gradient-header text-white py-3 px-6 shadow-lg">
+  <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🧪</span>
+      <div>
+        <h1 class="font-bold text-base leading-tight">Entorno de prueba — Asistente Galia</h1>
+        <p class="text-purple-200 text-xs">Simula ser un cliente y valida el flujo de conversación</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs">
+      <div id="apiStatus" class="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full">
+        <span class="status-dot bg-yellow-400"></span>
+        <span>Verificando API...</span>
+      </div>
+      <a href="/panel" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors">
+        <i class="fas fa-chart-bar mr-1"></i>Panel leads
+      </a>
+      <button onclick="resetTest()" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors">
+        <i class="fas fa-redo mr-1"></i>Reiniciar test
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- LAYOUT PRINCIPAL                           -->
+<!-- ══════════════════════════════════════════ -->
+<main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- ── COLUMNA IZQUIERDA: INFO DE PRUEBA ── -->
+  <aside class="lg:col-span-1 space-y-4">
+
+    <!-- Datos capturados -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-semibold text-gray-800 text-sm mb-4 flex items-center gap-2">
+        <i class="fas fa-clipboard-check text-purple-500"></i>
+        Datos capturados en tiempo real
+      </h2>
+      <div class="space-y-2.5">
+        <div class="data-pill empty border rounded-xl px-4 py-2.5 flex items-center gap-3" id="pill-salon">
+          <i class="fas fa-store text-sm w-4"></i>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide opacity-60">Nombre del salón</p>
+            <p class="text-sm font-semibold" id="val-salon">— Sin datos aún</p>
+          </div>
+        </div>
+        <div class="data-pill empty border rounded-xl px-4 py-2.5 flex items-center gap-3" id="pill-zona">
+          <i class="fas fa-map-marker-alt text-sm w-4"></i>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide opacity-60">Zona / Ciudad</p>
+            <p class="text-sm font-semibold" id="val-zona">— Sin datos aún</p>
+          </div>
+        </div>
+        <div class="data-pill empty border rounded-xl px-4 py-2.5 flex items-center gap-3" id="pill-hora">
+          <i class="fas fa-clock text-sm w-4"></i>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide opacity-60">Franja horaria</p>
+            <p class="text-sm font-semibold" id="val-hora">— Sin datos aún</p>
+          </div>
+        </div>
+        <div class="data-pill empty border rounded-xl px-4 py-2.5 flex items-center gap-3" id="pill-nombre">
+          <i class="fas fa-user text-sm w-4"></i>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide opacity-60">Nombre cliente</p>
+            <p class="text-sm font-semibold" id="val-nombre">— Sin datos aún</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="mt-4">
+        <div class="flex justify-between text-xs text-gray-400 mb-1">
+          <span>Completitud del lead</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="bg-gray-100 rounded-full h-2">
+          <div id="progressBar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Estado del lead -->
+      <div id="leadStatusBadge" class="hidden mt-4 text-center py-3 bg-green-50 border border-green-200 rounded-xl">
+        <p class="text-green-700 font-semibold text-sm">🎯 Lead completo</p>
+        <p class="text-green-600 text-xs mt-0.5">Listo para llamada</p>
+      </div>
+    </div>
+
+    <!-- Mensajes de prueba rápidos -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-semibold text-gray-800 text-sm mb-1 flex items-center gap-2">
+        <i class="fas fa-bolt text-yellow-500"></i>
+        Escenarios de prueba
+      </h2>
+      <p class="text-xs text-gray-400 mb-3">Haz clic para enviar como cliente</p>
+      <div class="space-y-2">
+        <div class="space-y-1">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Inicio conversación</p>
+          <button onclick="sendQuick('Hola, me interesa la asesoría gratuita')" class="qmsg w-full text-left text-xs bg-purple-50 text-purple-700 px-3 py-2 rounded-lg border border-purple-100 hover:bg-purple-100">
+            💬 "Hola, me interesa la asesoría gratuita"
+          </button>
+          <button onclick="sendQuick('Buenos días, vi vuestra publicación en Instagram')" class="qmsg w-full text-left text-xs bg-purple-50 text-purple-700 px-3 py-2 rounded-lg border border-purple-100 hover:bg-purple-100">
+            💬 "Vi vuestra publicación en Instagram"
+          </button>
+        </div>
+        <div class="space-y-1 pt-1">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dar horario</p>
+          <button onclick="sendQuick('Por la tarde mejor, sobre las 17h')" class="qmsg w-full text-left text-xs bg-blue-50 text-blue-700 px-3 py-2 rounded-lg border border-blue-100 hover:bg-blue-100">
+            ⏰ "Por la tarde, sobre las 17h"
+          </button>
+          <button onclick="sendQuick('Mañana a primera hora si puede ser')" class="qmsg w-full text-left text-xs bg-blue-50 text-blue-700 px-3 py-2 rounded-lg border border-blue-100 hover:bg-blue-100">
+            ⏰ "Mañana a primera hora"
+          </button>
+          <button onclick="sendQuick('No sé, cuando podáis')" class="qmsg w-full text-left text-xs bg-blue-50 text-blue-700 px-3 py-2 rounded-lg border border-blue-100 hover:bg-blue-100">
+            ⏰ "No sé, cuando podáis"
+          </button>
+        </div>
+        <div class="space-y-1 pt-1">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dar datos salón</p>
+          <button onclick="sendQuick('Peluquería Lucía, en Leganés')" class="qmsg w-full text-left text-xs bg-green-50 text-green-700 px-3 py-2 rounded-lg border border-green-100 hover:bg-green-100">
+            💇 "Peluquería Lucía, en Leganés"
+          </button>
+          <button onclick="sendQuick('Se llama Barber Kings y estamos en Vallecas')" class="qmsg w-full text-left text-xs bg-green-50 text-green-700 px-3 py-2 rounded-lg border border-green-100 hover:bg-green-100">
+            💇 "Barber Kings, en Vallecas"
+          </button>
+        </div>
+        <div class="space-y-1 pt-1">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Preguntas trampa ⚠️</p>
+          <button onclick="sendQuick('¿Cuánto cuesta el servicio?')" class="qmsg w-full text-left text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg border border-red-100 hover:bg-red-100">
+            ❓ "¿Cuánto cuesta?"
+          </button>
+          <button onclick="sendQuick('¿Me podéis garantizar más clientes?')" class="qmsg w-full text-left text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg border border-red-100 hover:bg-red-100">
+            ❓ "¿Garantizáis más clientes?"
+          </button>
+          <button onclick="sendQuick('¿Qué incluye exactamente la asesoría?')" class="qmsg w-full text-left text-xs bg-red-50 text-red-600 px-3 py-2 rounded-lg border border-red-100 hover:bg-red-100">
+            ❓ "¿Qué incluye la asesoría?"
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log de evaluación -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
+        <i class="fas fa-clipboard-list text-gray-400"></i>
+        Evaluación del asistente
+      </h2>
+      <div id="evalLog" class="space-y-1.5 text-xs text-gray-500 max-h-48 overflow-y-auto chat-scroll">
+        <p class="italic text-gray-300">Los resultados aparecerán aquí conforme avance la conversación...</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── COLUMNA DERECHA: CHAT ── -->
+  <section class="lg:col-span-2">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col" style="height: calc(100vh - 130px); min-height: 600px;">
+
+      <!-- Chat header -->
+      <div class="gradient-header px-5 py-3.5 flex items-center gap-3 flex-shrink-0">
+        <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-1">
+          <p class="text-white font-semibold text-sm">Asistente Galia Belleza</p>
+          <div class="flex items-center gap-1.5">
+            <span class="status-dot bg-green-400 flex-shrink-0"></span>
+            <span class="text-purple-200 text-xs" id="chatStatusText">En línea — gpt-5-mini</span>
+          </div>
+        </div>
+        <div class="text-right text-xs text-purple-200">
+          <p id="msgCount">0 mensajes</p>
+          <p id="turnCount">Turno 0</p>
+        </div>
+      </div>
+
+      <!-- Aviso modo prueba -->
+      <div class="bg-amber-50 border-b border-amber-100 px-5 py-2.5 flex items-center gap-2 text-xs text-amber-700 flex-shrink-0">
+        <i class="fas fa-flask"></i>
+        <strong>Modo prueba:</strong> escribe como si fueras una peluquera interesada. El asistente debe conseguir hora, salón y zona — nada más.
+      </div>
+
+      <!-- Mensajes -->
+      <div class="flex-1 overflow-y-auto chat-scroll p-5 space-y-4" id="chatMessages">
+        <!-- Bienvenida del asistente -->
+        <div class="flex gap-3 items-start" id="welcomeMsg">
+          <div class="w-8 h-8 gradient-btn rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+            <i class="fas fa-robot text-white text-xs"></i>
+          </div>
+          <div>
+            <div class="bubble-bot px-4 py-3 text-sm leading-relaxed max-w-md">
+              ¡Hola! 👋 Gracias por escribir a Galia Belleza. La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?
+            </div>
+            <p class="text-xs text-gray-400 mt-1 ml-1">Asistente · ahora</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input área -->
+      <div class="border-t border-gray-100 p-4 flex-shrink-0 bg-gray-50/50">
+        <div class="flex gap-3">
+          <input
+            type="text"
+            id="msgInput"
+            placeholder="Escribe como si fueras un cliente... (Enter para enviar)"
+            class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white"
+            onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMsg(); }"
+          />
+          <button
+            onclick="sendMsg()"
+            id="sendBtn"
+            class="gradient-btn text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity shadow-sm font-medium text-sm flex items-center gap-2"
+          >
+            <span>Enviar</span>
+            <i class="fas fa-paper-plane text-xs"></i>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-2 text-center">
+          Los mensajes se guardan como lead en la BD · 
+          <a href="/panel" class="text-purple-500 hover:underline">Ver panel de leads →</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── ESTADO ──────────────────────────────────
+  let leadId = null;
+  let msgCount = 0;
+  let turnCount = 0;
+  let capturedData = { salon: null, zona: null, hora: null, nombre: null };
+  const PHONE_TEST = '+34600TEST' + Date.now().toString().slice(-4); // teléfono ficticio único por sesión
+
+  // ── VERIFICAR API AL CARGAR ─────────────────
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const r = await fetch('/health');
+      const d = await r.json();
+      const el = document.getElementById('apiStatus');
+      if (d.openai === 'configurado') {
+        el.innerHTML = '<span class="status-dot bg-green-400"></span><span>OpenAI conectado ✓</span>';
+        el.className = el.className.replace('bg-white/10', 'bg-green-500/20');
+      } else {
+        el.innerHTML = '<span class="status-dot bg-red-400"></span><span>⚠️ Falta OPENAI_API_KEY</span>';
+        el.className = el.className.replace('bg-white/10', 'bg-red-500/20');
+      }
+    } catch (e) {
+      document.getElementById('apiStatus').innerHTML = '<span class="status-dot bg-red-400"></span><span>Servidor no disponible</span>';
+    }
+  });
+
+  // ── ENVIAR MENSAJE ───────────────────────────
+  async function sendMsg() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    await processMessage(text);
+  }
+
+  async function sendQuick(text) {
+    document.getElementById('msgInput').value = '';
+    await processMessage(text);
+  }
+
+  async function processMessage(text) {
+    // Añadir burbuja usuario
+    appendMsg(text, 'user');
+    msgCount++;
+    turnCount++;
+    updateCounters();
+
+    // Bloquear input
+    setInputEnabled(false);
+
+    // Mostrar typing
+    const typingId = showTyping();
+
+    try {
+      const res = await fetch('/lead-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          phone: PHONE_TEST,
+          source: 'test_prueba',
+          leadId: leadId || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      removeTyping(typingId);
+
+      if (data.reply) {
+        leadId = data.leadId;
+        appendMsg(data.reply, 'bot');
+        msgCount++;
+        updateCounters();
+
+        // Actualizar datos capturados desde la respuesta
+        if (data.dataCollected) {
+          updateCapturedData(data.dataCollected);
+        }
+
+        // Evaluar respuesta
+        evaluateResponse(text, data.reply, data.dataCollected);
+      } else {
+        throw new Error('Sin respuesta de IA');
+      }
+    } catch (err) {
+      removeTyping(typingId);
+      appendMsg('⚠️ Error al conectar con el asistente. Revisa que el servidor esté activo.', 'bot', true);
+      addEval('❌ ERROR: ' + err.message, 'red');
+    } finally {
+      setInputEnabled(true);
+      document.getElementById('msgInput').focus();
+    }
+  }
+
+  // ── BURBUJA DE MENSAJE ───────────────────────
+  function appendMsg(text, role, isError = false) {
+    const container = document.getElementById('chatMessages');
+    const now = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    const div = document.createElement('div');
+
+    if (role === 'user') {
+      div.className = 'flex gap-3 items-start justify-end';
+      div.innerHTML = `
+        <div class="text-right">
+          <div class="bubble-user px-4 py-3 text-sm leading-relaxed max-w-md inline-block">${esc(text)}</div>
+          <p class="text-xs text-gray-400 mt-1 mr-1">Tú (cliente simulado) · ${now}</p>
+        </div>
+        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+          <i class="fas fa-user text-gray-500 text-xs"></i>
+        </div>
+      `;
+    } else {
+      const errClass = isError ? 'bg-red-50 border-red-200 text-red-700' : '';
+      div.className = 'flex gap-3 items-start';
+      div.innerHTML = `
+        <div class="w-8 h-8 gradient-btn rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+          <i class="fas fa-robot text-white text-xs"></i>
+        </div>
+        <div>
+          <div class="bubble-bot px-4 py-3 text-sm leading-relaxed max-w-md ${errClass}">${esc(text)}</div>
+          <p class="text-xs text-gray-400 mt-1 ml-1">Asistente · ${now}</p>
+        </div>
+      `;
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ── TYPING INDICATOR ─────────────────────────
+  function showTyping() {
+    const id = 'typing-' + Date.now();
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.id = id;
+    div.className = 'flex gap-3 items-start';
+    div.innerHTML = `
+      <div class="w-8 h-8 gradient-btn rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+        <i class="fas fa-robot text-white text-xs"></i>
+      </div>
+      <div class="bubble-bot px-4 py-3 flex gap-1.5 items-center">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return id;
+  }
+
+  function removeTyping(id) {
+    document.getElementById(id)?.remove();
+  }
+
+  // ── ACTUALIZAR DATOS CAPTURADOS ──────────────
+  function updateCapturedData(data) {
+    let filled = 0;
+    const total = 3; // salon, zona, hora
+
+    if (data.salonName && data.salonName !== capturedData.salon) {
+      capturedData.salon = data.salonName;
+      setDataPill('salon', data.salonName);
+      addEval(`✅ Salón capturado: "${data.salonName}"`, 'green');
+    }
+    if (data.zone && data.zone !== capturedData.zona) {
+      capturedData.zona = data.zone;
+      setDataPill('zona', data.zone);
+      addEval(`✅ Zona capturada: "${data.zone}"`, 'green');
+    }
+    if (data.preferredTime && data.preferredTime !== capturedData.hora) {
+      capturedData.hora = data.preferredTime;
+      setDataPill('hora', data.preferredTime);
+      addEval(`✅ Franja capturada: "${data.preferredTime}"`, 'green');
+    }
+    if (data.name && data.name !== capturedData.nombre) {
+      capturedData.nombre = data.name;
+      setDataPill('nombre', data.name);
+    }
+
+    // Barra de progreso
+    if (capturedData.salon) filled++;
+    if (capturedData.zona) filled++;
+    if (capturedData.hora) filled++;
+
+    const pct = Math.round((filled / total) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+
+    if (filled >= total) {
+      document.getElementById('leadStatusBadge').classList.remove('hidden');
+      addEval('🎯 LEAD COMPLETO — los 3 datos conseguidos', 'purple');
+    }
+  }
+
+  function setDataPill(key, value) {
+    const pill = document.getElementById('pill-' + key);
+    const val = document.getElementById('val-' + key);
+    pill.className = pill.className.replace('empty', 'filled');
+    val.textContent = value;
+  }
+
+  // ── LOG DE EVALUACIÓN ────────────────────────
+  function evaluateResponse(userMsg, botReply, data) {
+    const reply = botReply.toLowerCase();
+    const user = userMsg.toLowerCase();
+
+    // ¿Pregunta por precios? → no debe responder con precios
+    if (user.includes('cuesta') || user.includes('precio') || user.includes('cobr')) {
+      if (reply.includes('€') || reply.includes('euro') || reply.includes('precio')) {
+        addEval('⚠️ ALERTA: El asistente mencionó precios', 'red');
+      } else {
+        addEval('✅ Correcto: No habló de precios, redirigió a franja horaria', 'green');
+      }
+    }
+
+    // ¿Garantizó resultados?
+    if (user.includes('garantiz') || user.includes('más clientes')) {
+      if (reply.includes('garantiz') || reply.includes('asegur')) {
+        addEval('⚠️ ALERTA: El asistente prometió resultados', 'red');
+      } else {
+        addEval('✅ Correcto: No prometió resultados', 'green');
+      }
+    }
+
+    // ¿Respuesta demasiado larga?
+    const wordCount = botReply.split(' ').length;
+    if (wordCount > 60) {
+      addEval(`⚠️ Respuesta larga: ${wordCount} palabras (límite: ~40)`, 'orange');
+    } else {
+      addEval(`✅ Longitud OK: ${wordCount} palabras`, 'green');
+    }
+
+    // ¿Sigue preguntando por hora si no la tiene?
+    if (!capturedData.hora && !reply.includes('hora') && !reply.includes('franja') && !reply.includes('cuándo') && !reply.includes('cuando') && !reply.includes('mañana') && !reply.includes('tarde')) {
+      addEval('⚠️ No preguntó por franja horaria', 'orange');
+    }
+  }
+
+  function addEval(text, color) {
+    const log = document.getElementById('evalLog');
+    const colors = {
+      green: 'text-green-600',
+      red: 'text-red-500',
+      orange: 'text-amber-600',
+      purple: 'text-purple-600 font-semibold',
+    };
+    const div = document.createElement('div');
+    div.className = `${colors[color] || 'text-gray-500'} flex gap-1.5`;
+    const now = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    div.innerHTML = `<span class="text-gray-300 flex-shrink-0">${now}</span><span>${text}</span>`;
+    if (log.querySelector('.italic')) log.innerHTML = '';
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ── UTILIDADES ───────────────────────────────
+  function updateCounters() {
+    document.getElementById('msgCount').textContent = msgCount + ' mensajes';
+    document.getElementById('turnCount').textContent = 'Turno ' + turnCount;
+  }
+
+  function setInputEnabled(enabled) {
+    document.getElementById('msgInput').disabled = !enabled;
+    document.getElementById('sendBtn').disabled = !enabled;
+    document.getElementById('sendBtn').style.opacity = enabled ? '1' : '0.5';
+    document.getElementById('chatStatusText').textContent = enabled
+      ? 'En línea — gpt-5-mini'
+      : '⌛ Generando respuesta...';
+  }
+
+  function esc(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>');
+  }
+
+  function resetTest() {
+    if (!confirm('¿Reiniciar la conversación de prueba?')) return;
+    leadId = null;
+    msgCount = 0;
+    turnCount = 0;
+    capturedData = { salon: null, zona: null, hora: null, nombre: null };
+
+    // Reset UI
+    document.getElementById('chatMessages').innerHTML = document.getElementById('welcomeMsg')?.outerHTML || '';
+    // Resetear pills
+    ['salon','zona','hora','nombre'].forEach(k => {
+      const pill = document.getElementById('pill-' + k);
+      const val = document.getElementById('val-' + k);
+      pill.className = pill.className.replace('filled','empty');
+      val.textContent = '— Sin datos aún';
+    });
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressPct').textContent = '0%';
+    document.getElementById('leadStatusBadge').classList.add('hidden');
+    document.getElementById('evalLog').innerHTML = '<p class="italic text-gray-300">Los resultados aparecerán aquí conforme avance la conversación...</p>';
+    updateCounters();
+
+    // Reconstruir mensaje de bienvenida
+    document.getElementById('chatMessages').innerHTML = `
+      <div class="flex gap-3 items-start" id="welcomeMsg">
+        <div class="w-8 h-8 gradient-btn rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+          <i class="fas fa-robot text-white text-xs"></i>
+        </div>
+        <div>
+          <div class="bubble-bot px-4 py-3 text-sm leading-relaxed max-w-md">
+            ¡Hola! 👋 Gracias por escribir a Galia Belleza. La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?
+          </div>
+          <p class="text-xs text-gray-400 mt-1 ml-1">Asistente · ahora</p>
+        </div>
+      </div>`;
+    document.getElementById('msgInput').focus();
+  }
+</script>
+</body>
+</html>
