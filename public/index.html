@@ -185,6 +185,7 @@
   <script>
     let currentLeadId = null;
     let chatPhone = '';
+    let conversationHistory = []; // historial local — no depende del JSON del servidor
 
     document.getElementById('chatInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendChatMessage();
@@ -211,11 +212,23 @@
         const res = await fetch('/lead-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, phone: chatPhone || null, source: 'chat_web', leadId: currentLeadId || undefined })
+          body: JSON.stringify({
+            message,
+            phone: chatPhone || null,
+            source: 'chat_web',
+            leadId: currentLeadId || undefined,
+            history: conversationHistory  // enviamos historial completo
+          })
         });
         const data = await res.json();
         removeTyping(typingId);
-        if (data.reply) { currentLeadId = data.leadId; appendMessage(data.reply, 'bot'); }
+        if (data.reply) {
+          currentLeadId = data.leadId;
+          // Actualizar historial local
+          conversationHistory.push({ role: 'user', content: message });
+          conversationHistory.push({ role: 'assistant', content: data.reply });
+          appendMessage(data.reply, 'bot');
+        }
       } catch {
         removeTyping(typingId);
         appendMessage('Lo sentimos, ha habido un error. Vuelve a intentarlo en un momento.', 'bot');

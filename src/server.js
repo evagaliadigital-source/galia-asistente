@@ -69,7 +69,7 @@ app.get("/health", (req, res) => {
 // ─────────────────────────────────────────────
 app.post("/lead-message", async (req, res) => {
   try {
-    const { name, phone, message, source = "web", leadId } = req.body;
+    const { name, phone, message, source = "web", leadId, history: clientHistory } = req.body;
 
     if (!message || message.trim() === "") {
       return res.status(400).json({ error: "El campo 'message' es obligatorio" });
@@ -82,8 +82,11 @@ app.post("/lead-message", async (req, res) => {
       ? getLeadByPhone(phone)
       : null;
 
-    // 2. Obtener historial de conversación previo
-    const conversationHistory = lead?.conversationHistory || [];
+    // 2. Obtener historial — prioridad: servidor > cliente (fallback si Railway redesplegó)
+    const serverHistory = lead?.conversationHistory || [];
+    const conversationHistory = serverHistory.length > 0
+      ? serverHistory
+      : (Array.isArray(clientHistory) ? clientHistory : []);
 
     // 3. Generar respuesta con OpenAI
     const aiReply = await generateLeadReply(conversationHistory, message);
