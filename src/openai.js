@@ -161,12 +161,19 @@ export async function generateLeadReply(conversationHistory = [], userMessage) {
         ...conversationHistory,
         { role: "user", content: userMessage },
       ],
-      max_tokens: 500,  // gpt-5-mini usa reasoning tokens internamente
+      max_tokens: 2000,  // gpt-5-mini: reasoning tokens internos consumen presupuesto — mínimo 2000
       temperature: 0.7,
     });
 
     const reply = response.choices[0].message.content?.trim();
     console.log(`💬 Usuario: "${userMessage.slice(0,50)}" → Bot: "${reply?.slice(0,80)}"`);
+
+    // Fallback si la IA devuelve cadena vacía (reasoning tokens agotados)
+    if (!reply) {
+      console.warn("⚠️ Reply vacío de OpenAI — usando fallback");
+      return "Claro 😊 Cuéntame un poco más sobre tu negocio para orientarte bien.";
+    }
+
     return reply;
   } catch (error) {
     console.error("❌ Error OpenAI:", error.status || "", error.message);

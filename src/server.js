@@ -132,7 +132,7 @@ app.post("/lead-message", async (req, res) => {
     return res.json({
       success: true,
       leadId: lead.id,
-      reply: aiReply,
+      reply: aiReply || "Claro 😊 Cuéntame un poco más y te ayudo.",
       leadStatus: lead.status,
       dataCollected: {
         name: lead.name,
