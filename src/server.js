@@ -26,6 +26,7 @@ import {
   getAllLeads,
   getLeadById,
   getLeadByPhone,
+  deleteLead,
   initDB,
 } from "./db.js";
 import { notifyNewLead } from "./notify.js";
@@ -263,6 +264,26 @@ app.patch("/leads/:id/status", (req, res) => {
     return res.json({ success: true, lead: updated });
   } catch (error) {
     console.error("❌ Error actualizando estado:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// DELETE /leads/:id
+// Borrar un lead por ID
+// ─────────────────────────────────────────────
+app.delete("/leads/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = deleteLead(id);
+    
+    if (!result.success) {
+      return res.status(404).json({ error: result.message });
+    }
+    
+    console.log(`🗑️ Lead borrado: ${id}`);
+    return res.json({ success: true, message: result.message });
+  } catch (error) {
+    console.error("❌ Error borrando lead:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });

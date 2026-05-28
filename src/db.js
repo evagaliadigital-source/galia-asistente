@@ -159,4 +159,20 @@ export function getLeadByPhone(phone) {
   return db.leads.find((l) => l.phone === phone) || null;
 }
 
+/**
+ * Borra un lead por ID
+ */
+export function deleteLead(id) {
+  const db = readDB();
+  const index = db.leads.findIndex((l) => l.id === id);
+  
+  if (index === -1) {
+    return { success: false, message: "Lead no encontrado" };
+  }
+  
+  db.leads.splice(index, 1);
+  writeDB(db);
+  return { success: true, message: "Lead borrado correctamente" };
+}
+
 export { initDB };
