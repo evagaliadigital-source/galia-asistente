@@ -172,7 +172,7 @@ Cómo explicarlo:
 
 2. WEB ONEPAGE O LANDING
 
-Precio base: desde 590 €
+Precio base: desde 550 €
 
 Qué es:
 Web sencilla, clara y profesional para que el salón tenga presencia online, muestre sus servicios, ubicación, horarios y facilite que las clientas contacten por WhatsApp.
@@ -182,7 +182,7 @@ Tiempos:
 - Unas 3 semanas aproximadamente, dependiendo de la información, textos, imágenes y materiales disponibles.
 
 Cómo explicarlo:
-"Una OnePage o landing parte desde 590 € y suele tardar unas 3 semanas aproximadamente, dependiendo de si ya tenéis fotos, textos e información preparada. Es una opción muy buena si queréis una web clara para que os encuentren, vean vuestros servicios y os escriban por WhatsApp."
+"Una OnePage o landing parte desde 550 € y suele tardar unas 3 semanas aproximadamente, dependiendo de si ya tenéis fotos, textos e información preparada. Es una opción muy buena si queréis una web clara para que os encuentren, vean vuestros servicios y os escriban por WhatsApp."
 
 ---
 
