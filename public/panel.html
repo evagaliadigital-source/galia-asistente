@@ -89,6 +89,12 @@
         <button onclick="downloadCSV()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg transition-colors" title="Descargar leads en CSV">
           <i class="fas fa-download mr-1"></i>CSV
         </button>
+        <button onclick="downloadCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors" title="Descargar todos los leads en CSV">
+          <i class="fas fa-download mr-1"></i>CSV
+        </button>
+        <button onclick="openDeleteModal()" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors" title="Borrar registros de prueba o duplicados">
+          <i class="fas fa-trash-alt mr-1"></i>Borrar
+        </button>
         <button onclick="loadLeads()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
           <i class="fas fa-sync-alt mr-1"></i>Actualizar
         </button>
@@ -156,6 +162,46 @@
     </div>
     <p class="text-center text-xs text-gray-400 mt-4" id="leadsCount"></p>
   </main>
+</div>
+
+<!-- MODAL BORRAR -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-trash-alt text-red-500 mr-2"></i>Borrar registros</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Selecciona los que quieres eliminar</p>
+      </div>
+      <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+    </div>
+    <!-- Acciones rápidas -->
+    <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex flex-wrap gap-2">
+      <button onclick="selectDuplicates()" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors">
+        <i class="fas fa-copy mr-1"></i>Marcar duplicados
+      </button>
+      <button onclick="selectTests()" class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
+        <i class="fas fa-flask mr-1"></i>Marcar pruebas/test
+      </button>
+      <button onclick="selectAll()" class="text-xs bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
+        <i class="fas fa-check-square mr-1"></i>Todos
+      </button>
+      <button onclick="deselectAll()" class="text-xs bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
+        <i class="fas fa-square mr-1"></i>Ninguno
+      </button>
+    </div>
+    <!-- Lista de leads para borrar -->
+    <div id="deleteList" class="overflow-y-auto flex-1 p-4 space-y-2"></div>
+    <!-- Footer -->
+    <div class="p-4 border-t border-gray-100 flex items-center justify-between gap-3">
+      <span class="text-xs text-gray-400" id="deleteCount">0 seleccionados</span>
+      <div class="flex gap-2">
+        <button onclick="closeDeleteModal()" class="text-sm px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
+        <button onclick="confirmDelete()" id="btnConfirmDelete" class="text-sm px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+          <i class="fas fa-trash-alt mr-1"></i>Eliminar seleccionados
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL DETALLE -->
@@ -499,6 +545,147 @@
   }
 
   setInterval(loadLeads, 30000);
+
+  // ── DESCARGA CSV ────────────────────────────────
+  function downloadCSV() {
+    if (!allLeads.length) { alert('No hay leads para exportar.'); return; }
+
+    const cols = ['ID','Nombre','Salón/Negocio','Zona','Teléfono','Franja horaria','Estado','Fuente','Notas','Fecha entrada','Última actualización'];
+    const rows = allLeads.map(l => [
+      l.id,
+      l.name || '',
+      l.salonName || '',
+      l.zone || '',
+      l.phone || '',
+      l.preferredTime || '',
+      fmtStatus(l.status),
+      fmtSource(l.source),
+      (l.notes || '').replace(/\n/g,' '),
+      fmtDate(l.createdAt),
+      fmtDate(l.updatedAt)
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`));
+
+    const csv = [cols.map(c=>`"${c}"`).join(','), ...rows.map(r=>r.join(','))].join('\n');
+    const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `galia-leads-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── MODAL BORRAR ────────────────────────────────
+  let selectedToDelete = new Set();
+
+  function openDeleteModal() {
+    selectedToDelete = new Set();
+    renderDeleteList();
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+  }
+
+  function renderDeleteList() {
+    const container = document.getElementById('deleteList');
+    if (!allLeads.length) {
+      container.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">No hay leads en la base de datos.</p>';
+      return;
+    }
+    container.innerHTML = allLeads.map(l => `
+      <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+        selectedToDelete.has(l.id) ? 'border-red-300 bg-red-50' : 'border-gray-100 hover:bg-gray-50'
+      }">
+        <input type="checkbox" class="delete-cb w-4 h-4 accent-red-500 flex-shrink-0"
+          data-id="${l.id}" ${selectedToDelete.has(l.id) ? 'checked' : ''}
+          onchange="toggleDelete('${l.id}', this.checked)" />
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">${l.name || '<span class="italic text-gray-400">Sin nombre</span>'} <span class="text-xs text-gray-400 ml-1">${l.salonName || ''}</span></p>
+          <p class="text-xs text-gray-400">${fmtSource(l.source)} · ${l.phone || 'sin tel.'} · ${l.zone || 'sin zona'} · ${fmtDate(l.createdAt)}</p>
+        </div>
+        <span class="status-badge status-${l.status} flex-shrink-0">${fmtStatus(l.status)}</span>
+      </label>`).join('');
+    updateDeleteCount();
+  }
+
+  function toggleDelete(id, checked) {
+    checked ? selectedToDelete.add(id) : selectedToDelete.delete(id);
+    renderDeleteList();
+  }
+
+  function selectDuplicates() {
+    // Detecta duplicados por teléfono o nombre — marca todos menos el más reciente
+    const byPhone = {};
+    const byName  = {};
+    allLeads.forEach(l => {
+      if (l.phone) { if (!byPhone[l.phone]) byPhone[l.phone]=[]; byPhone[l.phone].push(l); }
+      if (l.name)  { const k=l.name.trim().toLowerCase(); if (!byName[k]) byName[k]=[]; byName[k].push(l); }
+    });
+    [...Object.values(byPhone), ...Object.values(byName)].forEach(group => {
+      if (group.length < 2) return;
+      // Ordena por fecha: el más reciente se queda, los demás se marcan para borrar
+      const sorted = [...group].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+      sorted.slice(1).forEach(l => selectedToDelete.add(l.id));
+    });
+    renderDeleteList();
+  }
+
+  function selectTests() {
+    // Marca los que vienen de fuente test o tienen nombre/salón con palabras de prueba
+    const testWords = ['test','prueba','demo','ejemplo','asdf','qwerty','xxx','aaa','123'];
+    allLeads.forEach(l => {
+      const haystack = [(l.name||''), (l.salonName||''), (l.source||''), (l.phone||'')].join(' ').toLowerCase();
+      if (testWords.some(w => haystack.includes(w))) selectedToDelete.add(l.id);
+    });
+    renderDeleteList();
+  }
+
+  function selectAll()    { allLeads.forEach(l => selectedToDelete.add(l.id));  renderDeleteList(); }
+  function deselectAll()  { selectedToDelete.clear(); renderDeleteList(); }
+
+  function updateDeleteCount() {
+    const n = selectedToDelete.size;
+    document.getElementById('deleteCount').textContent = `${n} seleccionado${n!==1?'s':''}`;
+    document.getElementById('btnConfirmDelete').disabled = n === 0;
+  }
+
+  async function confirmDelete() {
+    const n = selectedToDelete.size;
+    if (!n) return;
+    if (!confirm(`¿Eliminar ${n} lead${n!==1?'s':''} definitivamente? Esta acción no se puede deshacer.`)) return;
+
+    const btn = document.getElementById('btnConfirmDelete');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Eliminando...';
+
+    let ok = 0, fail = 0;
+    for (const id of selectedToDelete) {
+      try {
+        const r = await fetch(`/leads/${id}`, { method: 'DELETE' });
+        r.ok ? ok++ : fail++;
+      } catch { fail++; }
+    }
+
+    closeDeleteModal();
+    await loadLeads();
+    const msg = ok > 0
+      ? `✅ ${ok} lead${ok!==1?'s':''} eliminado${ok!==1?'s':''}${fail>0?' · ⚠️ '+fail+' fallaron':''}.`
+      : `❌ No se pudo eliminar ningún registro.`;
+    showToast(msg, ok > 0 ? 'green' : 'red');
+  }
+
+  // ── TOAST ────────────────────────────────────────
+  function showToast(msg, color='green') {
+    const t = document.createElement('div');
+    t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-xl text-white text-sm font-medium shadow-lg transition-all`;
+    t.style.background = color==='green' ? '#16a34a' : '#dc2626';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
 </script>
 </body>
 </html>
