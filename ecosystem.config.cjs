@@ -8,7 +8,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000,
         // OpenAI / Genspark proxy
-        GSK_API_KEY: process.env.GSK_API_KEY || '',
+        GSK_API_KEY: 'gsk-eyJjb2dlbl9pZCI6ImE5NWMzMGMyLTJkMzktNDE0NC1iYWFmLTE5MzgwZWUxMjBjNSIsImtleV9pZCI6ImIzYmFiZjRlLWY4OTYtNDE4NC1iN2ZiLTk5MTE3Yjg5ZjY0YyIsImN0aW1lIjoxNzc5ODM1NzA2LCJjbGF1ZGVfYmlnX21vZGVsIjpudWxsLCJjbGF1ZGVfbWlkZGxlX21vZGVsIjpudWxsLCJjbGF1ZGVfc21hbGxfbW9kZWwiOm51bGx9fPTOiHn4M3Fnyyk85IZcWRXnlqziGyHQZ6PSK8YKTGb9',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
         // Panel interno
         ADMIN_API_KEY: process.env.ADMIN_API_KEY || 'galia_admin_2025',
