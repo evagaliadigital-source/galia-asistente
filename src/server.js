@@ -441,6 +441,7 @@ async function sendWaLeadEmail(leadData, lastMessage, history) {
               ${leadData.name ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Nombre</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.name}</span></td></tr>` : ""}
               ${leadData.businessType ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Tipo de negocio</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.businessType}</span></td></tr>` : ""}
               ${leadData.zone ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Zona</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.zone}</span></td></tr>` : ""}
+              ${leadData.phone ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Teléfono</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.phone}</span></td></tr>` : ""}
               ${leadData.preference ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Preferencia</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.preference}</span></td></tr>` : ""}
               <tr>
                 <td style="padding-top:20px;">

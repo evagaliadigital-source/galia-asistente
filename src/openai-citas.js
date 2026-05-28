@@ -127,8 +127,9 @@ Recoge de forma natural, máximo 1-2 preguntas por mensaje:
 1. Nombre de la persona
 2. Tipo de negocio (peluquería, barbería, uñas, estética…)
 3. Ciudad o zona
-4. Qué necesita o qué le interesa (web, agenda, WhatsApp, Google, presencia online, no lo sabe)
-5. Preferencia: llamada de 10 minutos o contacto del gestor por WhatsApp
+4. Número de teléfono o WhatsApp (solo si no lo tienes ya por el canal)
+5. Qué necesita o qué le interesa (web, agenda, WhatsApp, Google, presencia online, no lo sabe)
+6. Preferencia: llamada de 10 minutos o contacto del gestor por WhatsApp
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -191,11 +192,12 @@ Resumen:
 • Nombre: [nombre]
 • Negocio: [tipo de negocio]
 • Zona: [zona]
+• Teléfono: [teléfono]
 • Preferencia: [llamada de 10 minutos / contacto por gestor]
 
 En breve nos ponemos en contacto contigo. Gracias por escribir a Galia Belleza ✨"
 
-Si falta algún dato, pídelo antes de cerrar.
+Si falta algún dato — incluyendo el teléfono —, pídelo antes de cerrar.
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -296,6 +298,10 @@ function extractLeadDataFromHistory(history, lastReply) {
   if (lastReply.includes("Zona:")) {
     const zoneMatch = lastReply.match(/Zona:\s*([^\n•\*]+)/i);
     if (zoneMatch) data.zone = zoneMatch[1].trim();
+  }
+  if (lastReply.includes("Teléfono:")) {
+    const phoneMatch = lastReply.match(/Teléfono:\s*([^\n•\*]+)/i);
+    if (phoneMatch) data.phone = phoneMatch[1].trim();
   }
   if (lastReply.includes("Preferencia:")) {
     const prefMatch = lastReply.match(/Preferencia:\s*([^\n•\*]+)/i);
