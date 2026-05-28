@@ -211,7 +211,7 @@ export async function generateWaReply(conversationHistory = [], userMessage) {
         ...conversationHistory,
         { role: "user", content: userMessage },
       ],
-      max_tokens: 600,
+      max_tokens: 2000,
       temperature: 0.8,
     });
 
