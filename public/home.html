@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galia Belleza — Centro de Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f13;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Fondo animado sutil */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 20% 50%, rgba(100,53,143,0.12) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 20%, rgba(37,211,102,0.06) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+    }
+    .logo {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #64358F, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 32px rgba(100,53,143,0.4);
+    }
+    .header h1 {
+      color: #f1f5f9;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+    .header p {
+      color: #64748b;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      display: flex;
+      gap: 12px;
+      background: #1a1a24;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px 20px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      animation: pulse 2s infinite;
+    }
+    .status-dot.warn { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+
+    /* CARDS */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: #1a1a24;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-decoration: none;
+      transition: all .2s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity .2s;
+      border-radius: 16px;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    }
+    .card:hover::before { opacity: 1; }
+    .card:active { transform: translateY(0); }
+
+    /* Variantes de color */
+    .card.purple { --accent: #a855f7; }
+    .card.purple::before { background: linear-gradient(135deg, rgba(168,85,247,.06), transparent); }
+    .card.purple .card-icon { background: linear-gradient(135deg, #64358F, #a855f7); box-shadow: 0 4px 16px rgba(100,53,143,.4); }
+    .card.purple .card-arrow { color: #a855f7; }
+
+    .card.green { --accent: #25d366; }
+    .card.green::before { background: linear-gradient(135deg, rgba(37,211,102,.06), transparent); }
+    .card.green .card-icon { background: linear-gradient(135deg, #075e54, #25d366); box-shadow: 0 4px 16px rgba(37,211,102,.3); }
+    .card.green .card-arrow { color: #25d366; }
+
+    .card.blue { --accent: #60a5fa; }
+    .card.blue::before { background: linear-gradient(135deg, rgba(96,165,250,.06), transparent); }
+    .card.blue .card-icon { background: linear-gradient(135deg, #1d4ed8, #60a5fa); box-shadow: 0 4px 16px rgba(96,165,250,.3); }
+    .card.blue .card-arrow { color: #60a5fa; }
+
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .card-text { flex: 1; }
+    .card-title {
+      color: #f1f5f9;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card-desc {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .card-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .badge-live { background: rgba(34,197,94,.15); color: #22c55e; }
+    .badge-test { background: rgba(251,191,36,.15); color: #fbbf24; }
+    .badge-dev  { background: rgba(96,165,250,.15); color: #60a5fa; }
+
+    .card-arrow {
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .card:hover .card-arrow { transform: translateX(4px); }
+
+    /* DIVIDER */
+    .divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #334155;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: #1e293b;
+    }
+
+    /* FOOTER */
+    .footer {
+      color: #334155;
+      font-size: 12px;
+      text-align: center;
+    }
+    .footer span { color: #64358F; }
+
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">🐙</div>
+    <h1>Galia Belleza</h1>
+    <p>Centro de control · Asistentes IA</p>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-item">
+      <div class="status-dot" id="dotServer"></div>
+      <span id="txtServer">Comprobando...</span>
+    </div>
+    <div class="status-item">
+      <div class="status-dot" id="dotOpenai"></div>
+      <span id="txtOpenai">OpenAI</span>
+    </div>
+    <div class="status-item">
+      <div class="status-dot" id="dotResend"></div>
+      <span id="txtResend">Email</span>
+    </div>
+    <div class="status-item">
+      <div class="status-dot" id="dotWa"></div>
+      <span id="txtWa">WhatsApp</span>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards">
+
+    <!-- 1. Dashboard -->
+    <a href="/panel" class="card purple">
+      <div class="card-icon">📊</div>
+      <div class="card-text">
+        <div class="card-title">Dashboard</div>
+        <div class="card-desc">Leads, conversaciones y estado del sistema</div>
+        <span class="card-badge badge-live">Panel interno</span>
+      </div>
+      <span class="card-arrow">›</span>
+    </a>
+
+    <!-- 2. Bot WhatsApp -->
+    <a href="/test-wa" class="card green">
+      <div class="card-icon">📱</div>
+      <div class="card-text">
+        <div class="card-title">Bot WhatsApp</div>
+        <div class="card-desc">Recepcionista inteligente · Recoge datos y deriva</div>
+        <span class="card-badge badge-test">Simulador activo</span>
+      </div>
+      <span class="card-arrow">›</span>
+    </a>
+
+    <!-- 3. Agente Web -->
+    <a href="/" class="card blue">
+      <div class="card-icon">🌐</div>
+      <div class="card-text">
+        <div class="card-title">Agente Comercial Web</div>
+        <div class="card-desc">Informa, convence y agenda llamadas desde la web</div>
+        <span class="card-badge badge-dev">En desarrollo</span>
+      </div>
+      <span class="card-arrow">›</span>
+    </a>
+
+  </div>
+
+  <div class="divider">acceso rápido</div>
+
+  <!-- CARD TEST -->
+  <div class="cards">
+    <a href="/test" class="card" style="--accent:#475569; padding: 14px 24px;">
+      <div class="card-icon" style="background:#1e293b; box-shadow:none; width:40px; height:40px; font-size:18px;">🧪</div>
+      <div class="card-text">
+        <div class="card-title" style="font-size:14px;">Pantalla de prueba original</div>
+        <div class="card-desc">Test básico del servidor</div>
+      </div>
+      <span class="card-arrow" style="color:#475569;">›</span>
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Galia Belleza · <span>Galia Digital</span> · 2025
+  </div>
+
+</div>
+
+<script>
+  // Health check automático al cargar
+  async function checkHealth() {
+    try {
+      const res = await fetch('/health');
+      const data = await res.json();
+
+      // Servidor
+      document.getElementById('dotServer').className = 'status-dot';
+      document.getElementById('txtServer').textContent = 'Servidor activo';
+
+      // OpenAI
+      const okAI = data.openai?.includes('✅');
+      document.getElementById('dotOpenai').className = 'status-dot' + (okAI ? '' : ' warn');
+      document.getElementById('txtOpenai').textContent = okAI ? 'IA activa' : 'IA ⚠️';
+
+      // Resend
+      const okResend = data.resend?.includes('✅');
+      document.getElementById('dotResend').className = 'status-dot' + (okResend ? '' : ' warn');
+      document.getElementById('txtResend').textContent = okResend ? 'Email activo' : 'Email ⚠️';
+
+      // WhatsApp
+      const okWa = data.whatsapp?.includes('✅');
+      document.getElementById('dotWa').className = 'status-dot' + (okWa ? '' : ' warn');
+      document.getElementById('txtWa').textContent = okWa ? 'WhatsApp activo' : 'WhatsApp ⚠️';
+
+    } catch (e) {
+      document.getElementById('dotServer').className = 'status-dot warn';
+      document.getElementById('txtServer').textContent = 'Servidor caído';
+    }
+  }
+
+  checkHealth();
+  // Refresca cada 30 segundos
+  setInterval(checkHealth, 30000);
+</script>
+
+</body>
+</html>

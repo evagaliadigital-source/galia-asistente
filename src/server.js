@@ -502,6 +502,10 @@ app.get("/test-wa", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/test-wa.html"));
 });
 
+app.get("/home", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/home.html"));
+});
+
 // ─────────────────────────────────────────────
 // ARRANQUE
 // ─────────────────────────────────────────────
