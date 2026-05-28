@@ -17,6 +17,8 @@ module.exports = {
         WA_BUSINESS_ACCOUNT_ID: '1376971050938405',
         WA_ACCESS_TOKEN: 'EAAN8O9HL53YBRk2suNFx09FES8J2tv29JtoW6UFxzHCvn1KbTZCyyVt4CXfRFBRzsRDTNdWSQX4DLiZB5gkajZAZBwWKAZCkZCBLxxYjZBZAoIRj6wkrW19ngayn0sCKJTabptEoYhZBxHKci5CfDiuIsgu6Hw5bqgnEZAVmTbzlS2CnRljyEnmksOrE07PQd2uO5ZBFr4nkTZAMu6siFTPKyAZByScCZCacvPXqfSuglPcl1MLnqsZCrjmUSg0LP6jZBIBBDRsdsi331omclueLf0ZCqHeQn2VZAr',
         WA_VERIFY_TOKEN: 'galia_webhook_2025',
+        // ─── Email notificaciones (Resend) ───────────────────────────
+        RESEND_API_KEY: process.env.RESEND_API_KEY || 're_TGJwmrzA_GqhoBzQkxfLEWz5LbnzQe2dn',
       },
       watch: false,
       instances: 1,
