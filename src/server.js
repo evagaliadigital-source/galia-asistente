@@ -381,25 +381,59 @@ app.post("/webhook", async (req, res) => {
 
 // ─────────────────────────────────────────────
 // POST /wa-message — Bot WhatsApp de captación
-// Body: { message, history? }
+// Body: { message, history?, sessionId? }
+// sessionId: ID de lead previo para mantener conversación entre recargas
 // ─────────────────────────────────────────────
 app.post("/wa-message", async (req, res) => {
   try {
-    const { message, history: clientHistory } = req.body;
+    const { message, history: clientHistory, sessionId } = req.body;
 
     if (!message || message.trim() === "") {
       return res.status(400).json({ error: "El campo 'message' es obligatorio" });
     }
 
-    const conversationHistory = Array.isArray(clientHistory) ? clientHistory : [];
+    // Recuperar lead previo si existe sessionId
+    let lead = sessionId ? getLeadById(sessionId) : null;
+
+    // Historial: servidor > cliente (igual que agente web)
+    const serverHistory = lead?.conversationHistory || [];
+    const conversationHistory = serverHistory.length > 0
+      ? serverHistory
+      : (Array.isArray(clientHistory) ? clientHistory : []);
+
+    // Generar respuesta con el bot WA
     const { reply, isComplete, leadData } = await generateWaReply(conversationHistory, message);
 
-    // Si el bot ha completado el resumen → enviar email a Eva
-    if (isComplete && leadData) {
+    // Actualizar historial completo
+    const updatedHistory = [
+      ...conversationHistory,
+      { role: "user",      content: message },
+      { role: "assistant", content: reply   },
+    ];
+
+    // Upsert lead en BD — source "bot-wa" para distinguirlos en el panel
+    lead = upsertLead({
+      id:           lead?.id,
+      name:         leadData?.name         || lead?.name,
+      phone:        leadData?.phone        || lead?.phone,
+      salonName:    leadData?.businessType || lead?.salonName,
+      zone:         leadData?.zone         || lead?.zone,
+      preferredTime: leadData?.preference  || lead?.preferredTime,
+      lastMessage:  message,
+      source:       "bot-wa",
+      status:       lead?.status || "pendiente_llamar",
+    });
+
+    // Guardar conversación completa
+    updateConversation(lead.id, updatedHistory);
+
+    // Email al cerrar resumen (solo una vez)
+    if (isComplete && leadData && !lead._notified) {
       await sendWaLeadEmail(leadData, message, conversationHistory);
+      updateLeadStatus(lead.id, "pendiente_llamar");
     }
 
-    return res.json({ success: true, reply, isComplete });
+    return res.json({ success: true, reply, isComplete, sessionId: lead.id });
 
   } catch (error) {
     console.error("❌ Error en /wa-message:", error);

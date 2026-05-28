@@ -279,6 +279,7 @@
   <script>
     let waHistory = [];
     let isComplete = false;
+    let waSessionId = null; // ID del lead en BD — persiste entre recargas
 
     function getTime() {
       return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -341,10 +342,12 @@
         const res = await fetch('/wa-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history: waHistory })
+          body: JSON.stringify({ message, history: waHistory, sessionId: waSessionId })
         });
 
         const data = await res.json();
+        // Guardar sessionId para persistir conversación en BD
+        if (data.sessionId) waSessionId = data.sessionId;
         removeTyping();
         setStatus('en línea');
 
@@ -395,6 +398,7 @@
       if (!confirm('¿Empezar conversación de cero?')) return;
       waHistory = [];
       isComplete = false;
+      waSessionId = null;
       document.getElementById('waMessages').innerHTML = '';
       const badge = document.getElementById('statusBadge');
       badge.style.display = 'none';

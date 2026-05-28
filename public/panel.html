@@ -131,9 +131,12 @@
       <button onclick="filterLeads('todos')" class="filter-btn text-xs px-3 py-1.5 rounded-lg transition-colors active-filter" data-filter="todos">Todos</button>
       <button onclick="filterLeads('pendiente_llamar')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="pendiente_llamar">🔔 Pendientes</button>
       <button onclick="filterLeads('llamada_programada')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="llamada_programada">📅 Programadas</button>
-      <button onclick="filterLeads('llamado')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="llamado">✅ Llamados</button>
+      <button onclick="filterLeads('llamado')" class="filter-btn text-xs px-3 py-1.5 rounded-full bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="llamado">✅ Llamados</button>
       <button onclick="filterLeads('convertido')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="convertido">🎯 Convertidos</button>
       <button onclick="filterLeads('no_interesado')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="no_interesado">❌ No interesado</button>
+      <span class="text-gray-200">|</span>
+      <button onclick="filterBySource('bot-wa')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="source-bot-wa">🤖 Bot WA</button>
+      <button onclick="filterBySource('web')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-white text-gray-600 border border-gray-200 transition-colors" data-filter="source-web">🌐 Agente Web</button>
       <div class="ml-auto">
         <input type="text" placeholder="🔍 Buscar nombre, salón, zona..."
           class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 w-56"
@@ -301,6 +304,13 @@
     renderLeads(f === 'todos' ? allLeads : allLeads.filter(l => l.status === f));
   }
 
+  function filterBySource(src) {
+    currentFilter = 'todos';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+    document.querySelector(`[data-filter="source-${src}"]`).classList.add('active-filter');
+    renderLeads(allLeads.filter(l => l.source === src));
+  }
+
   function searchLeads(q) {
     if (!q) return filterLeads(currentFilter);
     const qL = q.toLowerCase();
@@ -406,7 +416,7 @@
     return { pendiente_llamar:'🔔 Pendiente', llamada_programada:'📅 Programada', llamado:'✅ Llamado', convertido:'🎯 Convertido', no_interesado:'❌ No interesado', no_contesta:'📵 No contesta' }[s] || s;
   }
   function fmtSource(s) {
-    return { web:'🌐 Web', chat_web:'💬 Chat', whatsapp:'📱 WhatsApp', formulario_web:'📝 Formulario', formulario:'📝 Formulario', test_prueba:'🧪 Test' }[s] || s;
+    return { web:'🌐 Web', chat_web:'💬 Chat', whatsapp:'📱 WhatsApp', 'bot-wa':'🤖 Bot WA', formulario_web:'📝 Formulario', formulario:'📝 Formulario', test_prueba:'🧪 Test' }[s] || s || '—';
   }
   function fmtDate(iso) {
     if (!iso) return '—';
