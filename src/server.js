@@ -11,6 +11,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { generateLeadReply } from "./openai.js";
+import { generateWaReply } from "./openai-citas.js";
+import { Resend } from "resend";
 import {
   sendWhatsAppMessage,
   extractWhatsAppMessage,
@@ -377,6 +379,109 @@ app.post("/webhook", async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
+// POST /wa-message — Bot WhatsApp de captación
+// Body: { message, history? }
+// ─────────────────────────────────────────────
+app.post("/wa-message", async (req, res) => {
+  try {
+    const { message, history: clientHistory } = req.body;
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ error: "El campo 'message' es obligatorio" });
+    }
+
+    const conversationHistory = Array.isArray(clientHistory) ? clientHistory : [];
+    const { reply, isComplete, leadData } = await generateWaReply(conversationHistory, message);
+
+    // Si el bot ha completado el resumen → enviar email a Eva
+    if (isComplete && leadData) {
+      await sendWaLeadEmail(leadData, message, conversationHistory);
+    }
+
+    return res.json({ success: true, reply, isComplete });
+
+  } catch (error) {
+    console.error("❌ Error en /wa-message:", error);
+    res.status(500).json({ error: "Error interno", message: error.message });
+  }
+});
+
+/**
+ * Email de cierre cuando el bot WA tiene todos los datos del lead
+ */
+async function sendWaLeadEmail(leadData, lastMessage, history) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const resend = new Resend(apiKey);
+  const fecha = new Date().toLocaleString("es-ES", { timeZone: "Europe/Madrid" });
+
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Nuevo lead WhatsApp</title></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:32px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+        <!-- CABECERA -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#075e54,#25d366);padding:28px 32px;text-align:center;">
+            <p style="margin:0;font-size:28px;">📱</p>
+            <h1 style="margin:8px 0 4px;color:#fff;font-size:20px;font-weight:700;">Nuevo lead — Bot WhatsApp</h1>
+            <p style="margin:0;color:#dcfce7;font-size:13px;">${fecha}</p>
+          </td>
+        </tr>
+
+        <!-- DATOS -->
+        <tr>
+          <td style="padding:28px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              ${leadData.name ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Nombre</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.name}</span></td></tr>` : ""}
+              ${leadData.businessType ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Tipo de negocio</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.businessType}</span></td></tr>` : ""}
+              ${leadData.zone ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Zona</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.zone}</span></td></tr>` : ""}
+              ${leadData.preference ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Preferencia</span><br><span style="font-size:15px;color:#111827;font-weight:500;">${leadData.preference}</span></td></tr>` : ""}
+              <tr>
+                <td style="padding-top:20px;">
+                  <p style="margin:0 0 6px;font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Último mensaje</p>
+                  <div style="background:#f0fdf4;border-left:3px solid #25d366;border-radius:0 8px 8px 0;padding:12px 16px;">
+                    <p style="margin:0;font-size:14px;color:#374151;font-style:italic;">&ldquo;${lastMessage}&rdquo;</p>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="background:#f9fafb;padding:16px 32px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="margin:0;font-size:12px;color:#9ca3af;">Galia Belleza · Bot WhatsApp de captación</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Asistente GALia <onboarding@resend.dev>",
+      to: "info.galiabelleza@gmail.com",
+      subject: `📱 Nuevo lead WA — ${leadData.name || "Sin nombre"} · ${leadData.zone || "Sin zona"}`,
+      html,
+    });
+    if (error) console.error("❌ Email WA lead error:", error);
+    else console.log(`✅ Email WA lead enviado — ID: ${data?.id}`);
+  } catch (err) {
+    console.error("❌ Error enviando email WA:", err.message);
+  }
+}
+
+// ─────────────────────────────────────────────
 // RUTAS WEB (Panel y Formulario)
 // ─────────────────────────────────────────────
 app.get("/", (req, res) => {
@@ -389,6 +494,10 @@ app.get("/panel", (req, res) => {
 
 app.get("/test", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/test.html"));
+});
+
+app.get("/test-wa", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/test-wa.html"));
 });
 
 // ─────────────────────────────────────────────
