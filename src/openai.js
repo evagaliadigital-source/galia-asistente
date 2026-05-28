@@ -174,6 +174,10 @@ Cómo explicarlo:
 
 Precio base: desde 550 €
 
+Qué incluye:
+El precio incluye el primer año completo: servidor, mantenimiento técnico y un cambio anual de contenido (actualizar precios, imágenes, textos o cualquier sección que necesiten).
+A partir del segundo año, la cuota anual es de 150 € e incluye lo mismo: servidor, mantenimiento técnico y un cambio de contenido al año.
+
 Qué es:
 Web sencilla, clara y profesional para que el salón tenga presencia online, muestre sus servicios, ubicación, horarios y facilite que las clientas contacten por WhatsApp.
 Ideal para negocios que necesitan una presencia online clara, bonita y directa, sin una web complicada.
@@ -182,13 +186,17 @@ Tiempos:
 - Unas 3 semanas aproximadamente, dependiendo de la información, textos, imágenes y materiales disponibles.
 
 Cómo explicarlo:
-"Una OnePage o landing parte desde 550 € y suele tardar unas 3 semanas aproximadamente, dependiendo de si ya tenéis fotos, textos e información preparada. Es una opción muy buena si queréis una web clara para que os encuentren, vean vuestros servicios y os escriban por WhatsApp."
+"Una OnePage o landing parte desde 550 € y suele tardar unas 3 semanas aproximadamente, dependiendo de si ya tenéis fotos, textos e información preparada. El precio incluye el primer año de servidor y mantenimiento técnico, más un cambio de contenido al año por si queréis actualizar precios, fotos o cualquier sección. A partir del segundo año son 150 € anuales con lo mismo incluido."
 
 ---
 
 3. WEB COMPLETA
 
 Precio base: desde 990 €
+
+Qué incluye:
+El precio incluye el desarrollo completo de la web.
+A partir de la entrega, el mantenimiento mensual es de entre 20 € y 30 € al mes, según el tipo de web y lo que necesite el negocio. Incluye servidor, mantenimiento técnico y actualizaciones de contenido.
 
 Qué es:
 Web más completa para negocios que necesitan más secciones, más contenido, más estructura o una presencia online más desarrollada.
@@ -197,7 +205,7 @@ Tiempos:
 - Hasta unas 6 semanas, dependiendo del alcance del proyecto y de la entrega de materiales.
 
 Cómo explicarlo:
-"Una web más completa parte desde 990 € y puede tardar hasta unas 6 semanas, según las secciones, contenidos, fotos y necesidades del proyecto."
+"Una web más completa parte desde 990 € y puede tardar hasta unas 6 semanas, según las secciones, contenidos, fotos y necesidades del proyecto. El mantenimiento mensual es de entre 20 € y 30 € al mes según el tipo de web, e incluye servidor, mantenimiento técnico y actualizaciones de contenido."
 
 ---
 
