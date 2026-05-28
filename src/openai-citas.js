@@ -295,26 +295,68 @@ export async function generateWaReply(conversationHistory = [], userMessage) {
 function extractLeadDataFromHistory(history, lastReply) {
   const data = {};
 
-  // Extraer del bloque Resumen: si está en el último reply
-  if (lastReply.includes("Nombre:")) {
-    const m = lastReply.match(/Nombre:\s*([^\n•\*]+)/i);
-    if (m) data.name = m[1].trim();
+  // ── PRIORIDAD 1: Extraer del bloque Resumen: (cierre final) ──
+  if (lastReply.includes("Resumen:")) {
+    const mName = lastReply.match(/Nombre:\s*([^\n•\*]+)/i);
+    if (mName) data.name = mName[1].trim();
+
+    const mBiz = lastReply.match(/Negocio:\s*([^\n•\*]+)/i);
+    if (mBiz) data.businessType = mBiz[1].trim();
+
+    const mZone = lastReply.match(/Zona:\s*([^\n•\*]+)/i);
+    if (mZone) data.zone = mZone[1].trim();
+
+    const mPhone = lastReply.match(/Teléfono:\s*([^\n•\*]+)/i);
+    if (mPhone) data.phone = mPhone[1].trim();
+
+    const mPref = lastReply.match(/Preferencia:\s*([^\n•\*]+)/i);
+    if (mPref) data.preference = mPref[1].trim();
+
+    return data; // Resumen completo → no buscar más
   }
-  if (lastReply.includes("Negocio:")) {
-    const m = lastReply.match(/Negocio:\s*([^\n•\*]+)/i);
-    if (m) data.businessType = m[1].trim();
+
+  // ── PRIORIDAD 2: Extraer progresivamente del historial completo ──
+  // Recorre todos los mensajes del usuario buscando nombre, zona, negocio
+  const allUserText = history
+    .filter(m => m.role === "user")
+    .map(m => m.content)
+    .join(" ");
+
+  // Nombre: buscar patrón "me llamo X", "soy X", "mi nombre es X"
+  if (!data.name) {
+    const mName =
+      allUserText.match(/(?:me llamo|mi nombre es|soy)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/i);
+    if (mName) data.name = mName[1].trim();
   }
-  if (lastReply.includes("Zona:")) {
-    const m = lastReply.match(/Zona:\s*([^\n•\*]+)/i);
-    if (m) data.zone = m[1].trim();
+
+  // Zona: buscar patrón "soy de X", "estoy en X", "de X", ciudad conocida
+  if (!data.zone) {
+    const mZone =
+      allUserText.match(/(?:soy de|estoy en|vivo en|ubicad[ao] en|en)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ\s,]+?)(?:\s*[,.]|$)/i);
+    if (mZone) data.zone = mZone[1].trim().replace(/,$/, "");
   }
-  if (lastReply.includes("Teléfono:")) {
-    const m = lastReply.match(/Teléfono:\s*([^\n•\*]+)/i);
-    if (m) data.phone = m[1].trim();
+
+  // Negocio: buscar "peluquería", "barbería", "salón", "centro de estética"
+  if (!data.businessType) {
+    const mBiz = allUserText.match(
+      /(peluquer[ií]a|barbería|salón de belleza|centro de estética|salón de uñas|nail|spa|[a-záéíóúñ]+\s+(?:pequeñ[ao]|median[ao]|grande))/i
+    );
+    if (mBiz) data.businessType = mBiz[1].trim();
   }
-  if (lastReply.includes("Preferencia:")) {
-    const m = lastReply.match(/Preferencia:\s*([^\n•\*]+)/i);
-    if (m) data.preference = m[1].trim();
+
+  // Preferencia de contacto
+  if (!data.preference) {
+    if (/llamad[ao]|por teléfono|llamame|llamen/i.test(allUserText)) {
+      data.preference = "Llamada breve";
+    } else if (/whatsapp|mensaje|escrib/i.test(allUserText)) {
+      data.preference = "WhatsApp";
+    }
+  }
+
+  // También revisar el lastReply por si el bot confirma el nombre
+  if (!data.name) {
+    const mBotName = lastReply.match(/(?:encantad[ao]|perfecto|genial|claro),?\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)\s*[!😊💜]/i);
+    if (mBotName) data.name = mBotName[1].trim();
   }
 
   return data;
