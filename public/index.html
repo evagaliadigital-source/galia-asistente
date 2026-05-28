@@ -171,6 +171,9 @@
             <button onclick="sendChatMessage()" class="gradient-btn text-white px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
               <i class="fas fa-paper-plane text-sm"></i>
             </button>
+            <button onclick="resetChat()" title="Reiniciar conversación" class="border border-gray-200 text-gray-400 hover:text-red-400 hover:border-red-200 px-3 py-2.5 rounded-xl transition-colors">
+              <i class="fas fa-redo text-sm"></i>
+            </button>
           </div>
           <div class="flex gap-2 mt-2 flex-wrap">
             <button onclick="quickReply('Mañana (9h-12h)')" class="text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-colors" style="background:#ede9fe;color:#64358F;">☀️ Mañana</button>
@@ -196,6 +199,28 @@
     document.getElementById('chatInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendChatMessage();
     });
+
+    function resetChat() {
+      if (!confirm('¿Reiniciar la conversación?')) return;
+      currentLeadId = null;
+      conversationHistory = [];
+      chatPhone = '';
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = `
+        <div class="flex gap-3 items-start">
+          <div class="w-8 h-8 rounded-full flex items-center justify-content-center flex-shrink-0 mt-0.5 overflow-hidden p-0.5 bg-white shadow-sm" style="display:flex;align-items:center;justify-content:center;">
+            <img src="/logo-galia.png" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">
+          </div>
+          <div>
+            <div class="bubble-bot px-4 py-3 text-sm leading-relaxed max-w-sm">
+              ¡Hola! 👋 Gracias por escribir a Galia Belleza. La asesoría es gratuita y dura unos 15 minutos — revisamos tu salón y te damos un plan de mejora sencillo para saber por dónde empezar. ¿A qué hora te viene mejor que te llamemos, hoy o mañana?
+            </div>
+            <p class="text-xs text-gray-400 mt-1 ml-1">Asistente · ahora</p>
+          </div>
+        </div>`;
+      document.getElementById('chatInput').value = '';
+      document.getElementById('phoneInputArea').style.display = '';
+    }
 
     function quickReply(text) {
       document.getElementById('chatInput').value = text;

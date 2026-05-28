@@ -236,6 +236,7 @@
         <div class="wa-contact-status" id="statusText">en línea</div>
       </div>
       <div class="wa-icons">
+        <span title="Reiniciar conversación" onclick="resetWa()" style="cursor:pointer;font-size:15px;" title="Nueva conversación">🔄</span>
         <span>📹</span>
         <span>📞</span>
       </div>
@@ -388,6 +389,24 @@
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
+
+    // Reset conversación
+    function resetWa() {
+      if (!confirm('¿Empezar conversación de cero?')) return;
+      waHistory = [];
+      isComplete = false;
+      document.getElementById('waMessages').innerHTML = '';
+      const badge = document.getElementById('statusBadge');
+      badge.style.display = 'none';
+      badge.className = 'status-badge';
+      setStatus('en línea');
+      document.getElementById('waInput').value = '';
+      document.getElementById('waInput').style.height = 'auto';
+      // Saludo inicial del bot
+      setTimeout(() => {
+        appendBubble('¡Hola! 👋 Soy el asistente de Galia Belleza. ¿En qué puedo ayudarte?', 'bot');
+      }, 400);
+    }
   </script>
 
 </body>
