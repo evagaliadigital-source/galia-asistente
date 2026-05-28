@@ -60,6 +60,7 @@ app.get("/health", (req, res) => {
     whatsapp: isWhatsAppConfigured()
       ? `✅ configurado (Phone ID: ${process.env.WA_PHONE_NUMBER_ID})`
       : "⚠️ NO CONFIGURADO — faltan WA_PHONE_NUMBER_ID y/o WA_ACCESS_TOKEN",
+    resend: process.env.RESEND_API_KEY ? "✅ configurado" : "❌ NO CONFIGURADO — emails no funcionan",
     verifyToken: process.env.WA_VERIFY_TOKEN || "galia_webhook_2025",
   });
 });
